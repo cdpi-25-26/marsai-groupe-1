@@ -7,7 +7,7 @@ function getVideos(req, res) {
   });
 }
 
-// Création
+// Créationz
 function createVideo(req, res) {
   if (!req.body) {
     return res.status(400).json({ error: "Données manquantes" });
