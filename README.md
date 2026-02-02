@@ -33,3 +33,16 @@ npm run back
 ```sh
 npm run front
 ```
+
+## Assets
+
+Les assets du projet (images, icônes, etc.) sont stockés dans les répertoires suivants :
+
+- **`front/src/assets/Image/`** - Images utilisées dans les pages du front
+  - Utilisé pour les pages de test
+  - Accessible via les composants React
+  
+Pour ajouter de nouveaux assets :
+1. Placez vos fichiers dans le dossier `front/src/assets/Image/`
+2. Importez-les dans vos composants : `import imageName from '../assets/Image/filename.ext'`
+3. Utilisez-les dans votre JSX
