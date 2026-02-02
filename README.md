@@ -46,3 +46,24 @@ Pour ajouter de nouveaux assets :
 1. Placez vos fichiers dans le dossier `front/src/assets/Image/`
 2. Importez-les dans vos composants : `import imageName from '../assets/Image/filename.ext'`
 3. Utilisez-les dans votre JSX
+
+### Intégrer les assets dans main.jsx
+
+Pour combiner et utiliser les assets dans le point d'entrée principal (`front/src/main.jsx`) :
+
+```jsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+// Importez vos assets
+import logo from './assets/Image/logo.png'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
+```
+
+Ensuite, utilisez les assets importés dans vos composants ou layouts.
