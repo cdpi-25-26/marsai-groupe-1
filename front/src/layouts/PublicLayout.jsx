@@ -1,11 +1,11 @@
 import { Outlet } from "react-router";
-import Navbar from "../components/Navbar";
+import { TopBar } from "./TopBar";
 
 export default function PublicLayout() {
   return (
     <div>
-      <Navbar />
-      <main>
+      <TopBar />
+      <main className="mt-52">  
         <Outlet />
       </main>
       <footer>Footer</footer>

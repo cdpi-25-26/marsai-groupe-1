@@ -1,0 +1,95 @@
+:root {
+  --font-size: 16px;
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: rgba(255, 255, 255, 0.05);
+  --card-foreground: #ffffff;
+  --popover: #000000;
+  --popover-foreground: #ffffff;
+  --primary: #51A2FF;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.1);
+  --secondary-foreground: #ffffff;
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: #a1a1aa;
+  --accent: rgba(255, 255, 255, 0.1);
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: transparent;
+  --input-background: rgba(255, 255, 255, 0.05);
+  --switch-background: #27272a;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #51A2FF;
+  --radius: 24px;
+  --radius-admin: 12px;
+  
+  --cyber-cyan: #51A2FF;
+  --cyber-purple: #9333ea;
+  --cyber-rose: #ec4899;
+  --cyber-emerald: #10b981;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: rgba(255, 255, 255, 0.05);
+  --card-foreground: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: 32px;
+  --color-cyber-cyan: var(--cyber-cyan);
+  --color-cyber-purple: var(--cyber-purple);
+  --color-cyber-rose: var(--cyber-rose);
+  --color-cyber-emerald: var(--cyber-emerald);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-['Arimo',_sans-serif];
+    background-image: 
+      radial-gradient(ellipse at 20% 20%, rgba(81, 162, 255, 0.015) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 80%, rgba(147, 51, 234, 0.015) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, label, button, input {
+    font-family: 'Arimo', sans-serif;
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+}
