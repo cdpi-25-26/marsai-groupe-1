@@ -1,41 +1,70 @@
+/**
+ * @bref Middleware d'authentification JWT avec gestion des rôles
+ * Pattern factory : requireAuth() ou requireAuth(["ADMIN"])
+ */
+
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { AppError } from "./errorHandler.js";
+import logger from "../utils/logger.js";
 
-export default async function AuthMiddleware(req, res, next, roles = []) {
-  const authHeader = req.header("Authorization");
-  const [prefix, token] = authHeader?.split(" ") || [null, undefined];
+/**
+ * @bref Factory de middleware d'authentification
+ * @param {string[]} roles - Rôles autorisés (vide = tous les rôles authentifiés)
+ * @returns {(req: any, res: any, next: Function) => Promise<void>} Middleware Express standard
+ */
+export const requireAuth = (roles = []) => {
+  return async (req, res, next) => {
+    try {
+      const authHeader = req.header("Authorization");
 
-  if (prefix !== "Bearer") {
-    return res.status(401).json({ error: "No Bearer token" });
-  }
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        throw new AppError("Token Bearer manquant", 401);
+      }
 
-  if (!token) {
-    return res
-      .status(401)
-      .json({ error: "You must be authenticated to access this resource" });
-  }
+      const token = authHeader.split(" ")[1];
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (!token) {
+        throw new AppError("Token d'authentification requis", 401);
+      }
 
-    if (!decoded?.username) {
-      return res.status(401).json({ error: "Invalid Payload" });
-    }
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findOne({
-      where: { username: decoded.username },
-    });
+      if (!decoded?.username) {
+        throw new AppError("Payload du token invalide", 401);
+      }
 
-    if (!user || (roles.length && !roles.includes(user.role))) {
-      return res.status(401).json({
-        error:
-          "Permission denied, you are not authorized to access this resource",
+      const user = await User.findOne({
+        where: { username: decoded.username },
+        attributes: { exclude: ["password"] },
       });
-    }
 
-    req.user = user;
-    return next();
-  } catch (error) {
-    return res.status(401).json({ error: error.message });
-  }
-}
+      if (!user) {
+        throw new AppError("Utilisateur introuvable", 401);
+      }
+
+      /**
+       * @bref Vérification des rôles
+       */
+      if (roles.length > 0 && !roles.includes(user.role)) {
+        logger.warn("Access denied", { userId: user.id, role: user.role, requiredRoles: roles });
+        throw new AppError("Permission refusée", 403);
+      }
+
+      req.user = user;
+      next();
+    } catch (error) {
+      if (error instanceof AppError) return next(error);
+      if (error.name === "JsonWebTokenError") return next(new AppError("Token invalide", 401));
+      if (error.name === "TokenExpiredError") return next(new AppError("Token expiré", 401));
+      next(new AppError("Erreur d'authentification", 401));
+    }
+  };
+};
+
+/**
+ * @bref Middleware par défaut (compatibilité legacy) - accepte tous les rôles authentifiés
+ */
+const AuthMiddleware = requireAuth();
+
+export default AuthMiddleware;

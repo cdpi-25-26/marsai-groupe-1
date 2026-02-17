@@ -8,10 +8,10 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 const registerSchema = z.object({
-  username: z.string(),
-  password: z.string(),
-  role: z.string().default("JURY"),
-  
+  email: z.string().email("Email invalide"),
+  username: z.string().min(3, "Username doit faire au moins 3 caractères"),
+  password: z.string().min(6, "Password doit faire au moins 6 caractères"),
+  role: z.enum(["ADMIN", "JURY", "REALISATEUR"]).default("REALISATEUR"),
 });
 
 export function Register() {
@@ -51,7 +51,20 @@ export function Register() {
     <>
       <h1 className="text-2xl">Register</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <input type="hidden" id="id" {...register("id")} />
+        <label
+          htmlFor="email"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          placeholder="votre@email.com"
+          {...register("email")}
+          required
+        />
+
         <label
           htmlFor="username"
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"

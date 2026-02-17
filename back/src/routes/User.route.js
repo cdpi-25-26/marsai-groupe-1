@@ -1,21 +1,44 @@
+/**
+ * @bref Routes User - Gestion des utilisateurs (Admin uniquement)
+ */
+
 import express from "express";
 import UserController from "../controllers/UserController.js";
-import AuthMiddleware from "../middlewares/AuthMiddleware.js";
+import { requireAuth } from "../middlewares/AuthMiddleware.js";
+import {
+  validateRequired,
+  validateEmail,
+  validateRole,
+  validateCountryCode,
+} from "../middlewares/validation.js";
 
 const userRouter = express.Router();
 
-// Admin
+/**
+ * @bref Toutes les routes nécessitent l'authentification Admin
+ */
+userRouter.use(requireAuth(["ADMIN"]));
 
-userRouter.use((req, res, next) => AuthMiddleware(req, res, next, ["ADMIN"]));
-
-userRouter.get("/", UserController.getUsers); // Liste de tous les utilisateurs
-userRouter.get("/:id", UserController.getUserById); // Récupérer un utilisateur par ID
-userRouter.post("/", UserController.createUser); // Créer un nouvel utilisateur
-userRouter.delete("/:id", UserController.deleteUser); // Supprimer un utilisateur par ID
+/**
+ * @bref Routes
+ */
+userRouter.get("/", UserController.getUsers);
+userRouter.get("/:id", UserController.getUserById);
+userRouter.post(
+  "/",
+  validateRequired(["email", "username", "password"]),
+  validateEmail,
+  validateRole,
+  validateCountryCode,
+  UserController.createUser
+);
 userRouter.put(
   "/:id",
-  // (req, res, next) => AuthMiddleware(req, res, next, ["PRODUCER"]),
-  UserController.updateUser,
-); // Modifier un utilisateur par ID
+  validateEmail,
+  validateRole,
+  validateCountryCode,
+  UserController.updateUser
+);
+userRouter.delete("/:id", UserController.deleteUser);
 
 export default userRouter;

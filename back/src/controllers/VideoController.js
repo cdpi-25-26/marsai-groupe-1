@@ -1,14 +1,27 @@
+/**
+ * @bref Contrôleur Video (legacy) — à migrer vers Film
+ */
+
 import Video from "../models/Video.js";
 
-// Liste
-function getVideos(req, res) {
-  Video.findAll().then((videos) => {
-    res.json(videos);
-  });
+/**
+ * @bref Liste des vidéos (legacy)
+ * @param {any} req - Requête Express
+ * @param {any} res - Réponse Express
+ * @returns {Promise<void>}
+ */
+async function getVideos(req, res) {
+  const videos = await Video.findAll();
+  res.json(videos);
 }
 
-// Créationz
-function createVideo(req, res) {
+/**
+ * @bref Crée une vidéo (legacy)
+ * @param {any} req - Requête Express
+ * @param {any} res - Réponse Express
+ * @returns {Promise<void>}
+ */
+async function createVideo(req, res) {
   if (!req.body) {
     return res.status(400).json({ error: "Données manquantes" });
   }
@@ -19,17 +32,11 @@ function createVideo(req, res) {
     return res.status(400).json({ error: "Tous les champs sont requis" });
   }
 
-  Video.findOne({ where: { title } }).then((video) => {
-    if (video) {
-      res.json(video);
-    } else {
-      Video.create({ title: title, description: description }).then(
-        (newVideo) => {
-          res.status(201).json(newVideo);
-        },
-      );
-    }
-  });
+  const existing = await Video.findOne({ where: { title } });
+  if (existing) return res.status(409).json({ error: "Vidéo déjà existante" });
+
+  const newVideo = await Video.create({ title, description });
+  res.status(201).json(newVideo);
 }
 
 export default { getVideos, createVideo };

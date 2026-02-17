@@ -1,90 +1,83 @@
-import User from "../models/User.js";
-import { hashPassword } from "../utils/password.js";
+/**
+ * @bref Contrôleur User - Refactorisé avec architecture professionnelle
+ * Controller → Service → Model
+ * Gestion d'erreurs centralisée avec asyncHandler
+ */
 
-// Liste
-function getUsers(req, res) {
-  User.findAll().then((users) => {
-    res.json(users);
-  });
-}
+import UserService from "../services/UserService.js";
+import { asyncHandler } from "../middlewares/errorHandler.js";
+import logger from "../utils/logger.js";
 
-// Création
-function createUser(req, res) {
-  console.log(req);
+/**
+ * @bref Récupère tous les utilisateurs
+ * @param {any} req - Requête Express
+ * @param {any} res - Réponse Express
+ * @returns {Promise<void>}
+ */
+export const getUsers = asyncHandler(async (req, res) => {
+  const users = await UserService.getAllUsers();
+  logger.info("Users fetched", { count: users.length });
+  res.json(users);
+});
 
-  if (!req.body) {
-    return res.status(400).json({ error: "Données manquantes" });
-  }
-
-  const { username, password, role } = req.body;
-
-  if (!username || !password || !role) {
-    return res.status(400).json({ error: "Tous les champs sont requis" });
-  }
-
-  User.findOne({ where: { username } }).then(async (user) => {
-    if (user) {
-      res.json({ message: "Utilisateur déjà existant", user });
-    } else {
-      const hash = await hashPassword(password);
-      User.create({ username: username, password: hash, role: role }).then(
-        (newUser) => {
-          res.status(201).json({ message: "Utilisateur créé", newUser });
-        },
-      );
-    }
-  });
-}
-
-// Suppression
-function deleteUser(req, res) {
+/**
+ * @bref Récupère un utilisateur par ID
+ * @param {any} req - Requête Express
+ * @param {any} res - Réponse Express
+ * @returns {Promise<void>}
+ */
+export const getUserById = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  User.destroy({ where: { id } }).then(() => {
-    res.status(204).json({ message: "Utilisateur supprimé" });
-  });
-}
+  const user = await UserService.getUserById(id);
+  logger.info("User fetched by ID", { userId: id });
+  res.json(user);
+});
 
-// Modification
-function updateUser(req, res) {
+/**
+ * @bref Crée un nouvel utilisateur
+ * @param {any} req - Requête Express
+ * @param {any} res - Réponse Express
+ * @returns {Promise<void>}
+ */
+export const createUser = asyncHandler(async (req, res) => {
+  const user = await UserService.createUser(req.body);
+  logger.info("User created", { userId: user.id });
+  res.status(201).json({
+    message: "Utilisateur créé avec succès",
+    user,
+  });
+});
+
+/**
+ * @bref Met à jour un utilisateur
+ * @param {any} req - Requête Express
+ * @param {any} res - Réponse Express
+ * @returns {Promise<void>}
+ */
+export const updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { username, password, role } = req.body;
+  const user = await UserService.updateUser(id, req.body);
+  logger.info("User updated", { userId: id });
+  res.json(user);
+});
 
-  User.findOne({ where: { id } }).then((user) => {
-    if (user) {
-      user.username = username || user.username;
-      user.password = password || user.password;
-      user.role = role || user.role;
-
-      user.save().then((updatedUser) => {
-        res.json(updatedUser);
-      });
-    } else {
-      res.status(404).json({ error: "Utilisateur non trouvé" });
-    }
-  });
-}
-
-// Récupérer un utilisateur par ID
-function getUserById(req, res) {
+/**
+ * @bref Supprime un utilisateur
+ * @param {any} req - Requête Express
+ * @param {any} res - Réponse Express
+ * @returns {Promise<void>}
+ */
+export const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  User.findOne({ where: { id } }).then((user) => {
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(404).json({ error: "Utilisateur non trouvé" });
-    }
-  });
-}
-
-function findUserByUsername(username) {
-  return User.findOne({ where: { username } });
-}
+  await UserService.deleteUser(id);
+  logger.info("User deleted", { userId: id });
+  res.status(204).send();
+});
 
 export default {
   getUsers,
-  createUser,
-  deleteUser,
-  updateUser,
   getUserById,
-  findUserByUsername,
+  createUser,
+  updateUser,
+  deleteUser,
 };

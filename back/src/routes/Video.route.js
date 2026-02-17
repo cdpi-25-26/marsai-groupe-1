@@ -1,14 +1,29 @@
+/**
+ * @bref Routes Video (legacy) — à migrer vers /films
+ */
+
 import express from "express";
 import VideoController from "../controllers/VideoController.js";
 
 const videoRouter = express.Router();
 
-videoRouter.get("/", VideoController.getVideos); // Admin
-videoRouter.post("/", VideoController.createVideo); // Admin
+/**
+ * @bref Routes legacy (admin attendu côté sécurité)
+ */
+videoRouter.get("/", VideoController.getVideos);
+videoRouter.post("/", VideoController.createVideo);
 
+/**
+ * @bref Upload vidéo (placeholder)
+ * @param {any} req - Requête Express
+ * @param {any} res - Réponse Express
+ * @returns {void}
+ */
 videoRouter.post("/upload", (req, res) => {
-  // Code à faire
+  /**
+   * @bref Code à faire
+   */
   res.send("Upload de vidéo");
-}); // User
+});
 
 export default videoRouter;

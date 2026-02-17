@@ -1,24 +1,52 @@
+/**
+ * @bref Point d'entrée - Plateforme marsAI
+ */
+
+import dotenv from "dotenv";
+dotenv.config(); 
+
 import express from "express";
 import cors from "cors";
 import router from "./src/routes/index.js";
-import { configDotenv } from "dotenv";
+import sequelize from "./src/db/connection.js";
+import "./src/models/index.js";
+import errorHandler from "./src/middlewares/errorHandler.js";
+import logger from "./src/utils/logger.js";
 
-configDotenv(); // Charger les variables d'environnement depuis le fichier .env
+const app = express();
 
-const app = express(); // Créer une application Express
+/**
+ * @bref Middlewares globaux
+ */
+app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+app.use(express.json({ limit: "5mb" }));
 
-app.use(cors({ origin: "*" })); // Autoriser les requêtes CORS de toutes origines
-app.use(express.json());
+/**
+ * @bref Routes API
+ */
+app.use("/api", router);
 
-const PORT = process.env.PORT || 3000; // Définir le port du serveur
+/**
+ * @bref Middleware de gestion d'erreurs (doit être en dernier)
+ */
+app.use(errorHandler);
 
-app.use("/", router);
+const PORT = process.env.PORT || 3000;
 
-// Démarrer le serveur
-app.listen(PORT, () => {
-  console.log("-----------------------------");
-  console.log("--        L'ARBITRE        --");
-  console.log("-----------------------------");
+sequelize
+  .sync({ alter: process.env.NODE_ENV !== "production" })
+  .then(() => {
+    logger.info("Base de données synchronisée");
 
-  console.log(`Le serveur est lancé sur http://localhost:${PORT}`);
-});
+    app.listen(PORT, () => {
+      logger.info("Serveur démarré", { port: PORT, env: process.env.NODE_ENV || "development" });
+      console.log("-----------------------------");
+      console.log("--     🪐 marsAI Platform 🪐     --");
+      console.log("-----------------------------");
+      console.log(`Serveur lancé sur http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    logger.error("Erreur sync BDD", { error: err.message });
+    process.exit(1);
+  });
