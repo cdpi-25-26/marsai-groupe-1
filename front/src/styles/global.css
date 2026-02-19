@@ -1,0 +1,23 @@
+/* Cacher la barre de défilement sur les navigateur WebKit (Chrome, Safari, Opera) */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/*Cacher la barre de défilement pour les navigateurs non WebKit ( Firefox, Edge ... )*/
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* ajouter un smooth schroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* previent le changement de style au toucher sur les boutons */
+button {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
