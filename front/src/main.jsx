@@ -7,6 +7,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 import Home from "./pages/public/Home.jsx";
 import Dashboard from "./pages/admin/Dashboard.jsx";
+import Users from "./pages/admin/Users.jsx";
+import Videos from "./pages/admin/Videos.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import PublicLayout from "./layouts/PublicLayout.jsx";
 import { Login } from "./pages/auth/Login.jsx";
@@ -43,6 +45,8 @@ createRoot(document.getElementById("root")).render(
             }
           >
             <Route index element={<Dashboard />} />
+            <Route path="users" element={<Users />} />
+            <Route path="videos" element={<Videos />} />
           </Route>
         </Routes>
       </QueryClientProvider>

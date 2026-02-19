@@ -12,7 +12,7 @@ export default function Navbar() {
   }
 
   return (
-    <div className="flex justify-between items-center ">
+    <div className="flex justify-between items-center pr-20">
       <div>
         <svg viewBox="0 0 176 21" className="h-5">
           <path

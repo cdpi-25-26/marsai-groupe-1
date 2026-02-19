@@ -10,15 +10,13 @@ function getUsers(req, res) {
 
 // Création
 function createUser(req, res) {
-  console.log(req);
-
   if (!req.body) {
     return res.status(400).json({ error: "Données manquantes" });
   }
 
-  const { username, password, role } = req.body;
+  const { username, email, password, role } = req.body;
 
-  if (!username || !password || !role) {
+  if (!username || !email || !password) {
     return res.status(400).json({ error: "Tous les champs sont requis" });
   }
 
@@ -27,7 +25,7 @@ function createUser(req, res) {
       res.json({ message: "Utilisateur déjà existant", user });
     } else {
       const hash = await hashPassword(password);
-      User.create({ username: username, password: hash, role: role }).then(
+      User.create({ username, email, password: hash, role: role || "PRODUCER" }).then(
         (newUser) => {
           res.status(201).json({ message: "Utilisateur créé", newUser });
         },
@@ -47,11 +45,12 @@ function deleteUser(req, res) {
 // Modification
 function updateUser(req, res) {
   const { id } = req.params;
-  const { username, password, role } = req.body;
+  const { username, email, password, role } = req.body;
 
   User.findOne({ where: { id } }).then((user) => {
     if (user) {
       user.username = username || user.username;
+      user.email = email || user.email;
       user.password = password || user.password;
       user.role = role || user.role;
 

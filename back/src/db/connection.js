@@ -9,7 +9,7 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
   dialect: process.env.DB_DIALECT,
 });
 
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
   console.log("La base de données est synchronisée.");
 });
 
