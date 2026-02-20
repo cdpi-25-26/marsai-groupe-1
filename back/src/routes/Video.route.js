@@ -5,6 +5,7 @@
 import express from "express";
 import multer from "multer";
 import VideoController from "../controllers/VideoController.js";
+import { requireAuth } from "../middlewares/AuthMiddleware.js";
 
 const videoRouter = express.Router();
 
@@ -24,18 +25,15 @@ const upload = multer({
   },
 });
 
-// ─── Legacy ───────────────────────────────────────────────────────────────────
-videoRouter.get("/", VideoController.getVideos);
-videoRouter.post("/", VideoController.createVideo);
-
 // ─── Scaleway S3 ──────────────────────────────────────────────────────────────
 
 /**
  * POST /api/videos/upload
  * Upload YouTube (unlisted) + vérification copyright + upload S3
+ * Requiert authentification pour pouvoir envoyer les notifications (approuvée/rejetée).
  * Body (multipart/form-data): video (file), title (string, optionnel)
  */
-videoRouter.post("/upload", upload.single("video"), VideoController.uploadVideo);
+videoRouter.post("/upload", requireAuth(), upload.single("video"), VideoController.uploadVideo);
 
 /**
  * GET /api/videos/list
@@ -55,5 +53,11 @@ videoRouter.get("/download", VideoController.downloadVideo);
  * Body: { key: "grp1/uuid.mp4" }
  */
 videoRouter.delete("/delete", VideoController.deleteVideo);
+
+/**
+ * GET /api/videos/upload/:id/status
+ * Récupère le statut d'un upload vidéo (copyright check)
+ */
+videoRouter.get("/upload/:id/status", VideoController.getUploadStatus);
 
 export default videoRouter;

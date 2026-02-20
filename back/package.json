@@ -7,6 +7,7 @@
     "start": "nodemon index.js",
     "db:diagnose": "node ./scripts/db-diagnose.js",
     "db:reset": "node ./scripts/db-reset.js",
+    "db:migrate-video-failed": "node ./scripts/migrate-video-upload-failed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -25,7 +26,8 @@
     "multer": "^2.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.16.1",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
