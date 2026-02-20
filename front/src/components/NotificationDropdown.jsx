@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Bell, Check, X, CheckCheck, Trash2, Video, Film, Calendar, AlertCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from "../api/notifications.js";
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification, createTestNotification } from "../api/notifications.js";
 
 function getNotificationIcon(type) {
   switch (type) {
@@ -86,6 +86,14 @@ export function NotificationDropdown() {
     },
   });
 
+  const testNotificationMutation = useMutation({
+    mutationFn: createTestNotification,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
+    },
+  });
+
   const notifications = notificationsData?.data || [];
   const unreadCount = unreadCountData?.data?.count || 0;
 
@@ -157,16 +165,26 @@ export function NotificationDropdown() {
             {/* Header */}
             <div className="p-4 border-b border-white/10 flex items-center justify-between">
               <h3 className="text-sm font-black uppercase tracking-widest text-white">Notifications</h3>
-              {unreadCount > 0 && (
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={handleMarkAllAsRead}
-                  disabled={markAllAsReadMutation.isPending}
-                  className="text-[10px] font-black uppercase tracking-widest text-[#51A2FF] hover:text-[#51A2FF]/80 transition-colors disabled:opacity-50 flex items-center gap-1"
+                  onClick={() => testNotificationMutation.mutate()}
+                  disabled={testNotificationMutation.isPending}
+                  title="Créer une notification de test"
+                  className="text-[10px] font-black uppercase tracking-widest text-amber-400 hover:text-amber-300 transition-colors disabled:opacity-50"
                 >
-                  <CheckCheck className="w-3 h-3" />
-                  Tout marquer lu
+                  Test
                 </button>
-              )}
+                {unreadCount > 0 && (
+                  <button
+                    onClick={handleMarkAllAsRead}
+                    disabled={markAllAsReadMutation.isPending}
+                    className="text-[10px] font-black uppercase tracking-widest text-[#51A2FF] hover:text-[#51A2FF]/80 transition-colors disabled:opacity-50 flex items-center gap-1"
+                  >
+                    <CheckCheck className="w-3 h-3" />
+                    Tout marquer lu
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Notifications List */}

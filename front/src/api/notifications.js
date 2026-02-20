@@ -11,15 +11,20 @@ async function getUnreadCount() {
 }
 
 async function markAsRead(notificationId) {
-  return await instance.put(`notifications/${notificationId}/read`);
+  return await instance.patch(`notifications/${notificationId}/read`);
 }
 
 async function markAllAsRead() {
-  return await instance.put("notifications/read-all");
+  return await instance.patch("notifications/read-all");
 }
 
 async function deleteNotification(notificationId) {
   return await instance.delete(`notifications/${notificationId}`);
 }
 
-export { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification };
+async function createTestNotification(type = null) {
+  const data = type ? { type } : {};
+  return await instance.post("notifications/test", data);
+}
+
+export { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification, createTestNotification };
