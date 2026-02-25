@@ -28,10 +28,13 @@ i18n.use(initReactI18next).init({
             subtitle: "La plateforme des talents musicaux"
           },
           discover: {
-            title: "Explorer",
-            worksCount: "œuvres",
+            title: "Découvrir",
+            worksCount: "Œuvres",
             search: "Rechercher un film, un réalisateur...",
             by: "by",
+            noResults: "Aucun résultat",
+            noResultsDesc: "Nous n'avons pas trouvé de films correspondant à vos critères de recherche.",
+            reset: "Réinitialiser",
             categories: {
               all: "Tous",
               scifi: "Sci-Fi",
@@ -42,8 +45,29 @@ i18n.use(initReactI18next).init({
               drama: "Drame",
               comedy: "Comédie",
               thriller: "Thriller",
-              philosophical: "Philosophique"
+              philosophical: "Philosophique",
+              documentary: "Documentaire"
             }
+          },
+          detail: {
+            close: "Fermer",
+            marsaiTop: "TOP",
+            directorManifesto: "Manifeste du réalisateur",
+            aiStack: "Architecture IA",
+            engine: "Moteur",
+            discussion: "Discussion",
+            opinions: "Avis",
+            writeCritique: "Écrivez votre critique...",
+            impactMetrics: "Mesures d'impact",
+            uniqueViews: "Vues uniques",
+            applause: "Applaudissements",
+            shares: "Propagations",
+            technicalSheet: "Fiche Technique",
+            country: "Pays",
+            ratio: "Ratio",
+            premiere: "Première",
+            notFound: "Film introuvable",
+            backToDiscover: "Retour à la découverte"
           },
           competition: {
             live: "CLASSEMENT EN DIRECT • MARSAI 2026",
@@ -114,10 +138,13 @@ i18n.use(initReactI18next).init({
             subtitle: "The platform for musical talents"
           },
           discover: {
-            title: "Explore",
-            worksCount: "works",
+            title: "Discover",
+            worksCount: "Works",
             search: "Search for a film, a director...",
             by: "by",
+            noResults: "No results",
+            noResultsDesc: "We couldn't find any films matching your search criteria.",
+            reset: "Reset",
             categories: {
               all: "All",
               scifi: "Sci-Fi",
@@ -128,8 +155,29 @@ i18n.use(initReactI18next).init({
               drama: "Drama",
               comedy: "Comedy",
               thriller: "Thriller",
-              philosophical: "Philosophical"
+              philosophical: "Philosophical",
+              documentary: "Documentary"
             }
+          },
+          detail: {
+            close: "Close",
+            marsaiTop: "TOP",
+            directorManifesto: "Director's Manifesto",
+            aiStack: "AI Stack",
+            engine: "Engine",
+            discussion: "Discussion",
+            opinions: "Reviews",
+            writeCritique: "Write your review...",
+            impactMetrics: "Impact Metrics",
+            uniqueViews: "Unique views",
+            applause: "Applause",
+            shares: "Shares",
+            technicalSheet: "Tech Sheet",
+            country: "Country",
+            ratio: "Ratio",
+            premiere: "Premiere",
+            notFound: "Film not found",
+            backToDiscover: "Back to discover"
           },
           competition: {
             live: "LIVE RANKINGS • MARSAI 2026",

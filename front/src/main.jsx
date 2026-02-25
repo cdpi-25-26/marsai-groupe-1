@@ -20,6 +20,7 @@ import Competition from "./pages/public/Competition.jsx";
 import Profile from "./pages/public/Profile.jsx";
 import JuryDashboard from "./pages/admin/JuryDashboard.jsx";
 import UploadPage from "./pages/public/Upload.jsx";
+import Detail from "./pages/public/Detail.jsx";
 
 
 const queryClient = new QueryClient({
@@ -48,6 +49,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="/jury-dashboard" element={<JuryDashboard />} />
               <Route path="/upload" element={<UploadPage />} />
               <Route path="/soumission" element={<UploadPage />} />
+              <Route path="/film/:id" element={<Detail />} />
             </Route>
 
             {/* Routes privées */}

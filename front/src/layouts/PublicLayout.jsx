@@ -6,7 +6,7 @@ export default function PublicLayout() {
   return (
     <div>
       <TopBar />
-      <main className="mt-52 pb-28">
+      <main className="mt-[88px] md:mt-[120px] pb-28">
         <Outlet />
       </main>
       <footer>Footer</footer>

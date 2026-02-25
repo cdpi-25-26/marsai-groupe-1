@@ -6,6 +6,7 @@
 import sequelize from "../db/connection.js";
 import User from "./User.js";
 import Film from "./Film.js";
+import Follow from "./Follow.js";
 import Video from "./Video.js";
 import VideoUpload from "./VideoUpload.js";
 import JuryRating from "./JuryRating.js";
@@ -24,6 +25,14 @@ import SubmissionConfig from "./SubmissionConfig.js";
  */
 User.hasMany(Film, { foreignKey: "userId" });
 Film.belongsTo(User, { foreignKey: "userId" });
+
+/**
+ * @bref User <-> Follow (abonnements entre utilisateurs)
+ */
+User.hasMany(Follow, { foreignKey: "followerId", as: "following" });
+User.hasMany(Follow, { foreignKey: "followingId", as: "followers" });
+Follow.belongsTo(User, { foreignKey: "followerId", as: "follower" });
+Follow.belongsTo(User, { foreignKey: "followingId", as: "followed" });
 
 /**
  * @bref User <-> JuryRating <-> Film (Jury note les finalistes)
@@ -75,6 +84,7 @@ export {
   sequelize,
   User,
   Film,
+  Follow,
   Video,
   VideoUpload,
   JuryRating,
@@ -89,6 +99,7 @@ export default {
   sequelize,
   User,
   Film,
+  Follow,
   Video,
   VideoUpload,
   JuryRating,

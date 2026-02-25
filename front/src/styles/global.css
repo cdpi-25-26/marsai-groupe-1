@@ -1,3 +1,8 @@
+/* Supprimer toutes les bordures sur l'ensemble du site */
+*, *::before, *::after {
+  border-width: 0 !important;
+}
+
 /* Cacher la barre de défilement sur les navigateur WebKit (Chrome, Safari, Opera) */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
