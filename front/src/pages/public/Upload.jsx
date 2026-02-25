@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Upload, CheckCircle, XCircle, Film, Loader2, Sparkles, ChevronLeft } from "lucide-react";
+import { Upload, CheckCircle, XCircle, Film, Loader2, Sparkles, ChevronLeft, FileText, X, Plus } from "lucide-react";
+import { uploadSubtitle } from "../../api/films.js";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -11,6 +12,16 @@ const CATEGORIES = [
   "Animation",
   "Séducteur",
   "Expérimental",
+];
+
+const SUBTITLE_LANGUAGES = [
+  { code: "fr", label: "Français" },
+  { code: "en", label: "English" },
+  { code: "es", label: "Español" },
+  { code: "de", label: "Deutsch" },
+  { code: "pt", label: "Português" },
+  { code: "ar", label: "العربية" },
+  { code: "zh", label: "中文" },
 ];
 
 function StepBar({ currentStep }) {
@@ -43,6 +54,11 @@ export default function UploadPage() {
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef(null);
 
+  // Sous-titres
+  const [subtitles, setSubtitles] = useState([]);
+  const [selectedLang, setSelectedLang] = useState("fr");
+  const subtitleInputRef = useRef(null);
+
   // Submission
   const [status, setStatus] = useState("idle");
   const [result, setResult] = useState(null);
@@ -58,6 +74,18 @@ export default function UploadPage() {
     setDragOver(false);
     const f = e.dataTransfer.files[0];
     if (f) handleFile(f);
+  };
+
+  const addSubtitle = (f) => {
+    if (!f) return;
+    setSubtitles((prev) => [
+      ...prev.filter((s) => s.language !== selectedLang),
+      { file: f, language: selectedLang },
+    ]);
+  };
+
+  const removeSubtitle = (language) => {
+    setSubtitles((prev) => prev.filter((s) => s.language !== language));
   };
 
   // Convertit "01:45" → 105 secondes
@@ -101,34 +129,16 @@ export default function UploadPage() {
         return;
       }
 
-      // ── Étape 2 : créer la fiche Film en base (si connecté + youtubeId) ──
-      if (token && uploadData.youtubeVideoId) {
-        try {
-          const filmRes = await fetch(`${API_URL}/api/films`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...authHeader,
-            },
-            body: JSON.stringify({
-              title,
-              description: synopsis || "",
-              youtubeId: uploadData.youtubeVideoId,
-              country: country || "FRA",
-              duration: parseDurationToSeconds(duration),
-              aiIdentity: { scenario: null, image: null, video: null, sound: null, postProduction: null },
-            }),
-          });
-
-          const filmData = await filmRes.json();
-          setResult({ ...uploadData, film: filmData.film });
-        } catch {
-          // La création de fiche Film a échoué mais la vidéo est bien uploadée
-          setResult(uploadData);
-        }
-      } else {
-        setResult(uploadData);
+      // ── Étape 2 : upload des sous-titres (le film est créé côté backend) ──
+      if (token && uploadData.filmId && subtitles.length > 0) {
+        await Promise.allSettled(
+          subtitles.map(({ file: subFile, language }) =>
+            uploadSubtitle(uploadData.filmId, subFile, language)
+          )
+        );
       }
+
+      setResult(uploadData);
 
       setStatus("success");
     } catch {
@@ -145,6 +155,8 @@ export default function UploadPage() {
     setDuration("");
     setSynopsis("");
     setFile(null);
+    setSubtitles([]);
+    setSelectedLang("fr");
     setStatus("idle");
     setResult(null);
     setError("");
@@ -344,6 +356,69 @@ export default function UploadPage() {
               )}
             </div>
 
+            {/* ── Sous-titres (optionnel) ─────────────────── */}
+            <div className="space-y-4">
+              <p className="text-white/25 text-[10px] font-bold uppercase tracking-[0.25em]">
+                Sous-titres <span className="text-white/15">(optionnel)</span>
+              </p>
+
+              <div className="flex gap-3">
+                <select
+                  value={selectedLang}
+                  onChange={(e) => setSelectedLang(e.target.value)}
+                  className="px-5 py-3 rounded-[50px] bg-white/[0.03] border border-white/[0.07] text-white text-sm font-medium outline-none focus:border-[#51A2FF]/40 transition-all appearance-none cursor-pointer"
+                >
+                  {SUBTITLE_LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code} className="bg-[#060606]">
+                      {l.label}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => subtitleInputRef.current?.click()}
+                  className="flex-1 py-3 rounded-[50px] bg-white/[0.03] border border-white/[0.07] text-white/55 text-sm font-bold uppercase tracking-[0.15em] hover:bg-white/[0.07] hover:border-[#51A2FF]/30 transition-all flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ajouter .srt / .vtt
+                </button>
+                <input
+                  ref={subtitleInputRef}
+                  type="file"
+                  accept=".srt,.vtt"
+                  className="hidden"
+                  onChange={(e) => addSubtitle(e.target.files[0])}
+                />
+              </div>
+
+              {subtitles.length > 0 && (
+                <div className="space-y-2">
+                  {subtitles.map(({ file: subFile, language }) => (
+                    <div
+                      key={language}
+                      className="flex items-center justify-between gap-3 px-5 py-3 rounded-[20px] bg-white/[0.03] border border-white/[0.07]"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <FileText className="w-4 h-4 text-[#51A2FF] shrink-0" />
+                        <span className="text-white/70 text-xs font-bold uppercase tracking-wider shrink-0">
+                          {language.toUpperCase()}
+                        </span>
+                        <span className="text-white/40 text-xs truncate">{subFile.name}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSubtitle(language)}
+                        className="text-white/30 hover:text-red-400 transition-colors shrink-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="flex gap-4">
               <button
                 onClick={() => setStep(1)}
@@ -384,6 +459,12 @@ export default function UploadPage() {
                 { label: "Pays", value: country },
                 { label: "Durée", value: duration },
                 { label: "Fichier", value: file?.name },
+                {
+                  label: "Sous-titres",
+                  value: subtitles.length
+                    ? subtitles.map((s) => s.language.toUpperCase()).join(", ")
+                    : null,
+                },
               ]
                 .filter((row) => row.value)
                 .map((row) => (

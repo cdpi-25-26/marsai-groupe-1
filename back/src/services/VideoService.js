@@ -196,6 +196,38 @@ function computeFileHash(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
+/**
+ * @brief Upload un fichier de sous-titres vers Scaleway S3
+ * @param {Express.Multer.File} file - Fichier SRT ou VTT
+ * @param {string} language - Code langue ISO 639-1 (fr, en, es...)
+ * @returns {Promise<{s3Url: string, key: string}>} URL S3 et clé du fichier
+ */
+async function uploadSubtitleToS3(file, language) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  const uniqueKey = `${FOLDER}/subtitles/${crypto.randomUUID()}_${language}${ext}`;
+
+  await s3Client.send(new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: uniqueKey,
+    Body: file.buffer,
+    ContentType: file.mimetype || "text/plain",
+  }));
+
+  const s3Url = `${process.env.SCW_ENDPOINT}/${BUCKET_NAME}/${uniqueKey}`;
+  logger.info("S3 subtitle upload success", { key: uniqueKey, language });
+  return { s3Url, key: uniqueKey };
+}
+
+/**
+ * @brief Supprime un fichier de sous-titres depuis Scaleway S3
+ * @param {string} key - Clé S3 du fichier de sous-titres
+ * @returns {Promise<void>}
+ */
+async function deleteSubtitleFromS3(key) {
+  await s3Client.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: key }));
+  logger.info("S3 subtitle delete success", { key });
+}
+
 export default {
   uploadToYoutube,
   checkYoutubeCopyright,
@@ -204,4 +236,6 @@ export default {
   downloadFromS3,
   deleteFromS3,
   computeFileHash,
+  uploadSubtitleToS3,
+  deleteSubtitleFromS3,
 };

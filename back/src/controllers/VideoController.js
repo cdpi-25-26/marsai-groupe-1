@@ -3,6 +3,7 @@
  */
 
 import VideoUpload from "../models/VideoUpload.js";
+import Film from "../models/Film.js";
 import Notification from "../models/Notification.js";
 import VideoService from "../services/VideoService.js";
 import { asyncHandler, AppError } from "../middlewares/errorHandler.js";
@@ -41,12 +42,42 @@ export const uploadVideo = asyncHandler(async (req, res) => {
 
   logger.info("Video upload created", { id: upload.id, key });
 
+  // Créer la fiche Film immédiatement si l'utilisateur est connecté
+  let filmId = null;
+  if (userId) {
+    try {
+      const country = (req.body.country || "FRA").toUpperCase().slice(0, 3);
+      const durationStr = req.body.duration || null;
+      let durationSec = null;
+      if (durationStr) {
+        const parts = durationStr.split(":").map(Number);
+        durationSec = parts.length === 2 ? parts[0] * 60 + parts[1] : Number(parts[0]) || null;
+      }
+
+      const film = await Film.create({
+        title,
+        description: req.body.synopsis || null,
+        duration: durationSec,
+        youtubeId: null,
+        country,
+        userId,
+        status: "PENDING",
+      });
+
+      filmId = film.id;
+      logger.info("Film created during upload", { filmId, userId });
+    } catch (filmErr) {
+      logger.error("Film creation failed during upload (non-blocking)", { error: filmErr.message });
+    }
+  }
+
   // Lancer la vérification copyright en arrière-plan
-  checkCopyrightAsync(upload.id, req.file.buffer, req.file.mimetype, req.file.originalname, title);
+  checkCopyrightAsync(upload.id, req.file.buffer, req.file.mimetype, req.file.originalname, title, filmId);
 
   res.status(201).json({
     message: "Vidéo uploadée. Vérification copyright en cours...",
     id: upload.id,
+    filmId,
     s3Url,
     key,
     copyrightStatus: "PENDING",
@@ -57,7 +88,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
  * @bref Vérification copyright en arrière-plan
  * Upload YouTube → attente 4 min → vérification copyright → APPROVED ou REJECTED
  */
-async function checkCopyrightAsync(uploadId, fileBuffer, mimeType, filename, title) {
+async function checkCopyrightAsync(uploadId, fileBuffer, mimeType, filename, title, filmId = null) {
   try {
     const upload = await VideoUpload.findByPk(uploadId);
     if (!upload) return;
@@ -67,6 +98,16 @@ async function checkCopyrightAsync(uploadId, fileBuffer, mimeType, filename, tit
     const { youtubeVideoId } = await VideoService.uploadToYoutube(file, title);
     await upload.update({ youtubeVideoId });
     logger.info("YouTube upload done", { uploadId, youtubeVideoId });
+
+    // Mettre à jour le youtubeId sur la fiche Film
+    if (filmId) {
+      try {
+        await Film.update({ youtubeId: youtubeVideoId }, { where: { id: filmId } });
+        logger.info("Film youtubeId updated", { filmId, youtubeVideoId });
+      } catch (err) {
+        logger.error("Failed to update Film youtubeId", { filmId, error: err.message });
+      }
+    }
 
     // 2. Attendre 4 minutes pour que YouTube Content ID scanne la vidéo
     logger.info(`Waiting ${COPYRIGHT_CHECK_DELAY / 1000}s before copyright check`, { uploadId, youtubeVideoId });

@@ -23,4 +23,11 @@ async function updateFilmStatus(id, data) {
 export const fetchSelectionOfficielle = () =>
   instance.get("/films/selection-officielle");
 
-export { getFilms, getFilmById, getSelectionOfficielle, updateFilmStatus };
+async function uploadSubtitle(filmId, file, language) {
+  const formData = new FormData();
+  formData.append("subtitle", file);
+  formData.append("language", language);
+  return await instance.post(`films/${filmId}/subtitles`, formData);
+}
+
+export { getFilms, getFilmById, getSelectionOfficielle, updateFilmStatus, uploadSubtitle };

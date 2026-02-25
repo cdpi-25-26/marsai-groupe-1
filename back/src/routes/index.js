@@ -10,6 +10,7 @@ import authRouter from "./Auth.route.js";
 import eventRouter from "./Event.route.js";
 import notificationRouter from "./Notification.route.js";
 import juryRatingRouter from "./JuryRating.route.js";
+import subtitleRouter from "./Subtitle.route.js";
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ router.use("/users", userRouter);
  */
 router.use("/videos", videoRouter);
 router.use("/films", filmRouter);
+router.use("/films/:filmId/subtitles", subtitleRouter);
 router.use("/events", eventRouter);
 router.use("/notifications", notificationRouter);
 /**

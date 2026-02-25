@@ -42,11 +42,11 @@ const Film = sequelize.define(
       comment: "Durée en secondes (max 60)",
       validate: { min: 1, max: 60 },
     },
-    // Lien YouTube - validation via API (CdC §4.3)
+    // Lien YouTube - validation via API (CdC §4.3) - null pendant le traitement async
     youtubeId: {
       type: DataTypes.STRING(20),
-      allowNull: false,
-      comment: "ID vidéo YouTube (ex: dQw4w9WgXcQ)",
+      allowNull: true,
+      comment: "ID vidéo YouTube (ex: dQw4w9WgXcQ), null jusqu'à la fin de l'upload YouTube",
     },
     // Poster : JPG, PNG, GIF max 2 Mo - chemin stocké après upload
     posterPath: {
