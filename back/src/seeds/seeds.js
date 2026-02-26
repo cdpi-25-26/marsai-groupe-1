@@ -516,12 +516,12 @@ async function main() {
     },
     {
       key: "submission_start",
-      value: "2024-01-01T00:00:00.000Z",
+      value: "2025-01-01T00:00:00.000Z",
       description: "Date d'ouverture des soumissions (ISO 8601)",
     },
     {
       key: "submission_end",
-      value: "2024-03-01T23:59:59.000Z",
+      value: "2026-06-30T23:59:59.000Z",
       description: "Date de fermeture des soumissions (ISO 8601)",
     },
     {

@@ -17,23 +17,30 @@ class FilmService {
    */
   async checkSubmissionPeriod() {
     try {
-      const opensAt = await SubmissionConfig.findOne({ where: { key: "submission_opens_at" } });
-      const closesAt = await SubmissionConfig.findOne({ where: { key: "submission_closes_at" } });
+      const openFlag = await SubmissionConfig.findOne({ where: { key: "submission_open" } });
 
-      if (!opensAt || !closesAt) {
-        throw new AppError("Période de soumission non configurée", 500);
+      /**
+       * @bref Si submission_open est explicitement "false", bloquer
+       */
+      if (openFlag && openFlag.value === "false") {
+        throw new AppError("Les soumissions sont actuellement fermées", 403);
       }
 
-      const now = new Date();
-      const openDate = new Date(opensAt.value);
-      const closeDate = new Date(closesAt.value);
+      const opensAt = await SubmissionConfig.findOne({ where: { key: "submission_start" } });
+      const closesAt = await SubmissionConfig.findOne({ where: { key: "submission_end" } });
 
-      if (now < openDate) {
-        throw new AppError("La période de soumission n'est pas encore ouverte", 403);
-      }
+      if (opensAt && closesAt) {
+        const now = new Date();
+        const openDate = new Date(opensAt.value);
+        const closeDate = new Date(closesAt.value);
 
-      if (now > closeDate) {
-        throw new AppError("La période de soumission est fermée", 403);
+        if (now < openDate) {
+          throw new AppError("La période de soumission n'est pas encore ouverte", 403);
+        }
+
+        if (now > closeDate) {
+          throw new AppError("La période de soumission est fermée", 403);
+        }
       }
 
       return true;
@@ -155,7 +162,15 @@ class FilmService {
         posterPath,
         country,
         aiIdentity,
+        videoUploadId,
       } = filmData;
+
+      /**
+       * @bref Valider la présence d'une miniature (thumbnail)
+       */
+      if (!posterPath) {
+        throw new AppError("Une miniature (posterPath) est obligatoire pour chaque film", 400);
+      }
 
       /**
        * @bref Valider la fiche IA (au moins un outil doit être renseigné)
@@ -174,6 +189,7 @@ class FilmService {
         country,
         aiIdentity: aiIdentity || {},
         userId,
+        videoUploadId,
         status: "PENDING",
       });
 

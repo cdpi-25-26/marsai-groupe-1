@@ -1,14 +1,13 @@
 import { Outlet } from "react-router";
-import { TopBar } from "./TopBar";
 import { BottomNavigation } from "./BottomNavBar";
 
-export default function PublicLayout() {
+export default function ConnectedLayout() {
   return (
     <div>
-      <TopBar></TopBar>
-      <main className="pt-24">
+      <main>
         <Outlet />
       </main>
+      <BottomNavigation></BottomNavigation>
     </div>
   );
 }

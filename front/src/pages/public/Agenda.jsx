@@ -15,6 +15,7 @@ import { ImageWithFallback } from "../../components/common/ImageWithFallBack";
 
 // Import figma assets from the provided code
 import imgMap from "../../assets/Image/8bda8b1a311ace4c1ca756fc036b819a50be97fb.png";
+import FooterLayout from "../../layouts/FooterLayout";
 
 const conferences = [
   { time: "09:30", type: "Social", title: "Accueil & Café Networking", color: "text-emerald-400" },
@@ -220,6 +221,7 @@ export function AgendaPage({ onNavigate }) {
           </div>
         </section>
       </div>
+      <FooterLayout></FooterLayout>
     </div>
   );
 }

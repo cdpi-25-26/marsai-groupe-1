@@ -42,11 +42,19 @@ const Film = sequelize.define(
       comment: "Durée en secondes (max 60)",
       validate: { min: 1, max: 60 },
     },
-    // Lien YouTube - validation via API (CdC §4.3)
+    // Lien YouTube - validation via API (CdC §4.3) - null pendant le traitement async
     youtubeId: {
       type: DataTypes.STRING(20),
-      allowNull: false,
-      comment: "ID vidéo YouTube (ex: dQw4w9WgXcQ)",
+      allowNull: true,
+      comment: "ID vidéo YouTube (ex: dQw4w9WgXcQ), null jusqu'à la fin de l'upload YouTube",
+    },
+    // Lien optionnel vers VideoUpload (pour synchroniser youtubeId après approbation)
+    videoUploadId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "video_uploads", key: "id" },
+      onDelete: "SET NULL",
+      comment: "ID VideoUpload associé à ce film",
     },
     // Poster : JPG, PNG, GIF max 2 Mo - chemin stocké après upload
     posterPath: {
@@ -92,6 +100,7 @@ const Film = sequelize.define(
       { name: "films_country_idx", fields: ["country"] },
       { name: "films_user_id_idx", fields: ["user_id"] },
       { name: "films_created_at_idx", fields: ["created_at"] },
+      { name: "films_video_upload_id_idx", fields: ["video_upload_id"] },
     ],
   }
 );

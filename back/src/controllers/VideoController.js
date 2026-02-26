@@ -3,6 +3,7 @@
  */
 
 import VideoUpload from "../models/VideoUpload.js";
+import Film from "../models/Film.js";
 import Notification from "../models/Notification.js";
 import VideoService from "../services/VideoService.js";
 import { asyncHandler, AppError } from "../middlewares/errorHandler.js";
@@ -79,6 +80,12 @@ async function checkCopyrightAsync(uploadId, fileBuffer, mimeType, filename, tit
     // 4. Pas de copyright → APPROVED
     await upload.update({ copyrightStatus: "APPROVED", lastCopyrightCheckAt: new Date() });
     logger.info("Video APPROVED", { uploadId, youtubeVideoId });
+
+    const film = await Film.findOne({ where: { videoUploadId: uploadId } });
+    if (film) {
+      await film.update({ youtubeId: youtubeVideoId });
+      logger.info("Film youtubeId synced", { filmId: film.id, youtubeVideoId });
+    }
 
     if (upload.userId) {
       await Notification.create({
@@ -186,4 +193,42 @@ export const getUploadStatus = asyncHandler(async (req, res) => {
   });
 });
 
-export default { uploadVideo, listVideos, downloadVideo, deleteVideo, getUploadStatus };
+/**
+ * POST /api/videos/thumbnail
+ * Upload d'une miniature (thumbnail) vers Scaleway S3
+ */
+export const uploadThumbnail = asyncHandler(async (req, res) => {
+  if (!req.file) throw new AppError("Fichier image requis (champ 'thumbnail')", 400);
+
+  const { url, key } = await VideoService.uploadThumbnailToS3(req.file);
+
+  res.status(201).json({
+    message: "Thumbnail uploadé avec succès",
+    url,
+    key,
+  });
+});
+
+/**
+ * POST /api/videos/subtitle
+ * Upload d'un fichier de sous-titres vers Scaleway S3 (pré-upload sans filmId)
+ */
+export const uploadSubtitle = asyncHandler(async (req, res) => {
+  if (!req.file) throw new AppError("Fichier de sous-titres requis (champ 'subtitle')", 400);
+
+  const language = (req.body.language || "").toLowerCase();
+  if (!language) throw new AppError("Le code langue est requis (ex: fr, en)", 400);
+
+  const { s3Url, key } = await VideoService.uploadSubtitleToS3(req.file, language);
+
+  res.status(201).json({
+    message: "Sous-titre uploadé avec succès",
+    s3Url,
+    s3Key: key,
+    language,
+    format: req.file.originalname.split(".").pop().toLowerCase(),
+    filename: req.file.originalname,
+  });
+});
+
+export default { uploadVideo, listVideos, uploadThumbnail, uploadSubtitle, downloadVideo, deleteVideo, getUploadStatus };

@@ -26,8 +26,8 @@ filmRouter.get("/:id", FilmController.getFilmById);
  */
 filmRouter.post(
   "/",
-  requireAuth(["REALISATEUR"]),
-  validateRequired(["title", "youtubeId", "country", "aiIdentity"]),
+  requireAuth(["REALISATEUR", "ADMIN"]),
+  validateRequired(["title", "country"]),
   validateYouTubeId,
   validateCountryCode,
   validateDuration,

@@ -6,6 +6,7 @@
 import sequelize from "../db/connection.js";
 import User from "./User.js";
 import Film from "./Film.js";
+import FilmSubtitle from "./FilmSubtitle.js";
 import VideoUpload from "./VideoUpload.js";
 import JuryRating from "./JuryRating.js";
 import NewsletterSubscriber from "./NewsletterSubscriber.js";
@@ -70,10 +71,23 @@ Notification.belongsTo(User, { foreignKey: "userId" });
 User.hasMany(VideoUpload, { foreignKey: "userId" });
 VideoUpload.belongsTo(User, { foreignKey: "userId" });
 
+/**
+ * @bref VideoUpload <-> Film (un upload vidéo peut être lié à un film)
+ */
+VideoUpload.hasOne(Film, { foreignKey: "videoUploadId", as: "film" });
+Film.belongsTo(VideoUpload, { foreignKey: "videoUploadId", as: "videoUpload" });
+
+/**
+ * @bref Film <-> FilmSubtitle (sous-titres multi-langues)
+ */
+Film.hasMany(FilmSubtitle, { foreignKey: "filmId", as: "subtitles" });
+FilmSubtitle.belongsTo(Film, { foreignKey: "filmId", as: "film" });
+
 export {
   sequelize,
   User,
   Film,
+  FilmSubtitle,
   VideoUpload,
   JuryRating,
   NewsletterSubscriber,
@@ -87,6 +101,7 @@ export default {
   sequelize,
   User,
   Film,
+  FilmSubtitle,
   VideoUpload,
   JuryRating,
   NewsletterSubscriber,

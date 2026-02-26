@@ -20,6 +20,7 @@ import CMS from "./pages/admin/CMS.jsx";
 import EditEvent from "./pages/admin/EditEvent.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import PublicLayout from "./layouts/PublicLayout.jsx";
+import BottomNavLayout from "./layouts/BottomNavLayout.jsx";
 import { Login } from "./pages/auth/Login.jsx";
 import { Register } from "./pages/auth/Register.jsx";
 import { RoleGuard } from "./middlewares/RoleGuard.jsx";
@@ -50,17 +51,20 @@ createRoot(document.getElementById("root")).render(
             <Route path="/" element={<PublicLayout />}>
               <Route index element={<LandingPage />} />
               <Route path="/auth/login" element={<Login />} />
-              <Route path="/discover" element={<Discover />} />
               <Route path="/competition" element={<Competition />} />
               <Route path="/Agenda" element={<AgendaPage />} />
-              <Route path="/Profile" element={<Profile />} />
               <Route path="/auth/register" element={<Register />} />
               <Route path="/jury-dashboard" element={<JuryDashboard />} />
               <Route path="/upload" element={<UploadPage />} />
               <Route path="/jury/:filmId" element={<JuryVotePage />} />
               <Route path="/soumission" element={<UploadPage />} />
-                            <Route path="/film/:id" element={<Detail />} />
-
+              <Route path="/film/:id" element={<Detail />} />
+            </Route>
+            
+            {/* Routes avec Bottom Navigation uniquement */}
+            <Route path="/" element={<BottomNavLayout />}>
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
             {/* Routes admin */}
             <Route
@@ -71,6 +75,8 @@ createRoot(document.getElementById("root")).render(
                 </RoleGuard>
               }
             >
+
+            
               <Route index element={<Dashboard />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="submissions" element={<Submissions />} />

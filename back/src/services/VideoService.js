@@ -196,6 +196,65 @@ function computeFileHash(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
+/**
+ * @brief Upload un fichier de sous-titres vers Scaleway S3
+ * @param {Express.Multer.File} file - Fichier SRT ou VTT
+ * @param {string} language - Code langue ISO 639-1 (fr, en, es...)
+ * @returns {Promise<{s3Url: string, key: string}>} URL S3 et clé du fichier
+ */
+async function uploadSubtitleToS3(file, language) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  const uniqueKey = `${FOLDER}/subtitles/${crypto.randomUUID()}_${language}${ext}`;
+
+  await s3Client.send(new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: uniqueKey,
+    Body: file.buffer,
+    ContentType: file.mimetype || "text/plain",
+  }));
+
+  const s3Url = `${process.env.SCW_ENDPOINT}/${BUCKET_NAME}/${uniqueKey}`;
+  logger.info("S3 subtitle upload success", { key: uniqueKey, language });
+  return { s3Url, key: uniqueKey };
+}
+
+/**
+ * @brief Supprime un fichier de sous-titres depuis Scaleway S3
+ * @param {string} key - Clé S3 du fichier de sous-titres
+ * @returns {Promise<void>}
+ */
+async function deleteSubtitleFromS3(key) {
+  await s3Client.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: key }));
+  logger.info("S3 subtitle delete success", { key });
+}
+
+/**
+ * @brief Upload un fichier thumbnail vers Scaleway S3
+ * @param {Express.Multer.File} file - Fichier image (jpg, png, webp)
+ * @returns {Promise<{url: string, key: string}>} URL S3 et clé du fichier
+ */
+async function uploadThumbnailToS3(file) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  const allowed = [".jpg", ".jpeg", ".png", ".webp"];
+
+  if (!allowed.includes(ext)) {
+    throw new AppError("Format image non supporté (jpg, png, webp)", 400);
+  }
+
+  const uniqueKey = `${FOLDER}/thumbnails/${crypto.randomUUID()}${ext}`;
+
+  await s3Client.send(new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: uniqueKey,
+    Body: file.buffer,
+    ContentType: file.mimetype,
+  }));
+
+  const url = `${process.env.SCW_ENDPOINT}/${BUCKET_NAME}/${uniqueKey}`;
+  logger.info("Thumbnail upload success", { key: uniqueKey });
+  return { url, key: uniqueKey };
+}
+
 export default {
   uploadToYoutube,
   checkYoutubeCopyright,
@@ -204,4 +263,7 @@ export default {
   downloadFromS3,
   deleteFromS3,
   computeFileHash,
+  uploadSubtitleToS3,
+  deleteSubtitleFromS3,
+  uploadThumbnailToS3,
 };
