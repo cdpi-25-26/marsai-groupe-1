@@ -23,9 +23,8 @@ const JuryRating = sequelize.define(
       onDelete: "CASCADE",
     },
     score: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.ENUM("TRES_BIEN", "BIEN", "BOF", "JAIME_PAS"),
       allowNull: false,
-      validate: { min: 1, max: 10 },
     },
     internalComment: {
       type: DataTypes.TEXT,

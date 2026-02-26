@@ -36,11 +36,11 @@ export function Login() {
     },
     onSuccess: (response, variables, context) => {
       // If you are logged
-      localStorage.setItem("username", response.data?.username);
-      localStorage.setItem("role", response.data?.role);
+      localStorage.setItem("username", response.data?.user?.username);
+      localStorage.setItem("role", response.data?.user?.role);
       localStorage.setItem("token", response.data?.token);
 
-      switch (response.data?.role) {
+      switch (response.data?.user?.role) {
         case "ADMIN":
           navigate("/admin");
           break;
@@ -53,7 +53,7 @@ export function Login() {
       }
     },
     onError: (error, variables, context) => {
-      alert(error.response?.data?.error);
+      alert(error.response?.data?.message || "Identifiants incorrects");
     },
   });
 

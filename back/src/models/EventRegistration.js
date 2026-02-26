@@ -27,6 +27,13 @@ const EventRegistration = sequelize.define(
       allowNull: false,
     },
 
+    ticketType: {
+      type: DataTypes.ENUM("standard", "vip", "pmr", "press"),
+      allowNull: false,
+      defaultValue: "standard",
+      comment: "Type de billet : standard, vip, pmr, press",
+    },
+
     /**
      * @bref QR / contrôle d'accès
      */
@@ -58,6 +65,11 @@ const EventRegistration = sequelize.define(
       allowNull: false,
       defaultValue: 0,
       comment: "Nombre de scans enregistrés (anti-abus / audit simple)",
+    },
+    expiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: "Date d'expiration du QR code (null = pas d'expiration)",
     },
     revokedAt: {
       type: DataTypes.DATE,

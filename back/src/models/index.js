@@ -11,6 +11,7 @@ import JuryRating from "./JuryRating.js";
 import NewsletterSubscriber from "./NewsletterSubscriber.js";
 import Event from "./Event.js";
 import EventRegistration from "./EventRegistration.js";
+import ScanLog from "./ScanLog.js";
 import Notification from "./Notification.js";
 import SubmissionConfig from "./SubmissionConfig.js";
 
@@ -59,6 +60,14 @@ EventRegistration.belongsTo(User, {
 });
 
 /**
+ * @bref ScanLog : historique des scans QR
+ */
+User.hasMany(ScanLog, { foreignKey: "scannedByUserId", as: "scanLogs" });
+ScanLog.belongsTo(User, { foreignKey: "scannedByUserId", as: "scannedBy" });
+EventRegistration.hasMany(ScanLog, { foreignKey: "registrationId", as: "scanLogs" });
+ScanLog.belongsTo(EventRegistration, { foreignKey: "registrationId", as: "registration" });
+
+/**
  * @bref Notifications
  */
 User.hasMany(Notification, { foreignKey: "userId" });
@@ -73,6 +82,7 @@ export {
   NewsletterSubscriber,
   Event,
   EventRegistration,
+  ScanLog,
   Notification,
   SubmissionConfig,
 };
@@ -86,6 +96,7 @@ export default {
   NewsletterSubscriber,
   Event,
   EventRegistration,
+  ScanLog,
   Notification,
   SubmissionConfig,
 };

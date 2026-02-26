@@ -17,6 +17,11 @@ import Discover from "./pages/public/Discover.jsx";
 import Competition from "./pages/public/Competition.jsx";
 import Profile from "./pages/public/Profile.jsx"; 
 import JuryDashboard from "./pages/admin/JuryDashboard.jsx";
+import TicketPage from "./pages/public/TicketPage.jsx";
+import ScannerPage from "./pages/public/ScannerPage.jsx";
+import ScanHistoryPage from "./pages/public/ScanHistoryPage.jsx";
+import QRGeneratorPage from "./pages/public/QRGeneratorPage.jsx";
+import DevMenuPage from "./pages/public/DevMenuPage.jsx";
 
 
 const queryClient = new QueryClient({
@@ -42,6 +47,11 @@ createRoot(document.getElementById("root")).render(
             <Route path="/Profile" element={<Profile />} />
             <Route path="/auth/register" element={<Register />} />
             <Route path="/jury-dashboard" element={<JuryDashboard />} />
+            <Route path="/ticket" element={<TicketPage />} />
+            <Route path="/scanner" element={<ScannerPage />} />
+            <Route path="/scan-history" element={<ScanHistoryPage />} />
+            <Route path="/qr-generator" element={<QRGeneratorPage />} />
+            <Route path="/dev" element={<DevMenuPage />} />
           </Route>
 
           {/* Routes privées */}
