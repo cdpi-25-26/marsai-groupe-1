@@ -99,6 +99,11 @@ i18n.use(initReactI18next).init({
               label: "Partenaires",
               title: "Nos Partenaires Stratégiques"
             },
+            jury: {
+              label: "Jury International",
+              title: "Le Jury",
+              description: "Cinq experts reconnus de l'art numérique et du cinéma IA pour évaluer les œuvres en compétition."
+            },
             footer: {
               tagline: "Où l'imagination rencontre l'intelligence artificielle.",
               nav: "Navigation",
@@ -275,6 +280,11 @@ i18n.use(initReactI18next).init({
             partners: {
               label: "Partners",
               title: "Our Strategic Partners"
+            },
+            jury: {
+              label: "International Jury",
+              title: "The Jury",
+              description: "Five recognized experts in digital art and AI cinema to evaluate the competing works."
             },
             footer: {
               tagline: "Where imagination meets artificial intelligence.",

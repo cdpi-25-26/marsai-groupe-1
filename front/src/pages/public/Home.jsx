@@ -17,12 +17,6 @@ import imgRevesSynthetiques from "../../assets/Image/33b7d0b9228d904d0c7a25d5a64
 import imgCodeQuantique from "../../assets/Image/2a36b4071dbaca8c1fe10d67a48e4aba0a375cc8.png";
 import imgEchosDuFutur from "../../assets/Image/f44ef0fc9641fe42c8a8e189a434ce74f4a29955.png";
 
-// Partner Logos
-import imgLogo1 from "../../assets/Image/4acb560ae2e727a6a37837ae9574bf6c08a271c8.png";
-import imgLogo2 from "../../assets/Image/83fbf140f57b899c976e236d877758bbb8eda98a.png";
-import imgLogo3 from "../../assets/Image/368cd55c89c85ac47a6120fc0834c49ef2387ad0.png";
-import imgLogo4 from "../../assets/Image/3b0df5010436dc5724dcd4a8821d268af56caa7e.png";
-import imgLogo5 from "../../assets/Image/8bda8b1a311ace4c1ca756fc036b819a50be97fb.png";
 
 export function LandingPage({ onNavigate }) {
   const { t } = useTranslation();
@@ -278,9 +272,10 @@ export function LandingPage({ onNavigate }) {
 
       {/* Section: Partenaires */}
       <section className="py-20 md:py-32 px-4 md:px-6">
-        <div className="w-full max-w-7xl mx-auto text-center">
-          <div className="flex flex-col items-center gap-4 mb-12 md:mb-20">
-            <div className="flex items-center gap-2 text-white/20 font-bold uppercase tracking-[0.4em] text-[10px]">
+        <div className="w-full max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-16 md:mb-24">
+            <div className="flex items-center justify-center gap-2 text-white/20 font-bold uppercase tracking-[0.4em] text-[10px] mb-5">
               <div className="w-8 md:w-12 h-px bg-white/10" />
               <span>{t('pages.landing.partners.label')}</span>
               <div className="w-8 md:w-12 h-px bg-white/10" />
@@ -290,17 +285,63 @@ export function LandingPage({ onNavigate }) {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {[imgLogo1, imgLogo2, imgLogo3, imgLogo4, imgLogo5].slice(0, 4).map((logo, i) => (
-              <div
-                key={i}
-                className="bg-white/5 border border-white/5 p-8 md:p-12 rounded-[20px] md:rounded-[24px] flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group min-h-[140px] md:min-h-[180px]"
-              >
-                <ImageWithFallback
-                  src={logo}
-                  className="max-h-10 md:max-h-12 w-auto object-contain transition-transform duration-500 group-hover:scale-110 opacity-60 group-hover:opacity-100"
-                />
-              </div>
+          {/* Institutionnels */}
+          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16 mb-14">
+            {PARTNER_TIERS.institutional.map((p) => (
+              <PartnerLogo key={p.name} {...p} size="lg" />
+            ))}
+          </div>
+
+          {/* Partenaires Officiels */}
+          <PartnerSectionLabel label="Partenaires Officiels" color="purple" />
+          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16 mb-14">
+            {PARTNER_TIERS.official.map((p) => (
+              <PartnerLogo key={p.name} {...p} size="md" />
+            ))}
+          </div>
+
+          {/* Sponsors */}
+          <PartnerSectionLabel label="Sponsors" color="blue" />
+          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16 mb-14">
+            {PARTNER_TIERS.sponsors.map((p) => (
+              <PartnerLogo key={p.name} {...p} size="md" />
+            ))}
+          </div>
+
+          {/* Partenaires */}
+          <PartnerSectionLabel label="Partenaires" color="purple" />
+          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16">
+            {PARTNER_TIERS.partners.map((p) => (
+              <PartnerLogo key={p.name} {...p} size="sm" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Section: Jury */}
+      <section className="py-20 md:py-32 px-4 md:px-6 bg-[#080808]">
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="text-center mb-16 md:mb-24">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="w-8 md:w-12 h-px bg-[#51A2FF]" />
+              <span className="text-[#51A2FF] font-bold uppercase tracking-[0.4em] text-xs">
+                {t('pages.landing.jury.label')}
+              </span>
+              <div className="w-8 md:w-12 h-px bg-[#51A2FF]" />
+            </div>
+            <h2 className="text-4xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-[0.95] mb-6">
+              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20">
+                {t('pages.landing.jury.title')}
+              </span>
+            </h2>
+            <p className="text-white/30 text-lg md:text-xl font-normal max-w-xl mx-auto leading-relaxed">
+              {t('pages.landing.jury.description')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
+            {JURY_MEMBERS.map((member) => (
+              <JuryCard key={member.name} {...member} />
             ))}
           </div>
         </div>
@@ -454,5 +495,165 @@ function StatCard({ value, label, color }) {
       <span className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-2 text-white">{value}</span>
       <span className={`font-black uppercase tracking-[0.4em] text-[10px] ${colorMap[color]}`}>{label}</span>
     </div>
+  );
+}
+
+const PARTNER_TIERS = {
+  institutional: [
+    { name: "Département\ndes Bouches-du-Rhône", logo: "https://logo.clearbit.com/bouches-du-rhone.fr",  sub: "INSTITUTION RÉGIONALE" },
+    { name: "Institut Europia",                   logo: "https://logo.clearbit.com/europia.org",          sub: "COMPRENDRE POUR AGIR" },
+    { name: "La Maison de l'IA",                  logo: "https://logo.clearbit.com/lamaisondelai.fr",     sub: "INTELLIGENCE ARTIFICIELLE" },
+  ],
+  official: [
+    { name: "betaseries",      logo: "https://logo.clearbit.com/betaseries.com" },
+    { name: "Studio Laffitte", logo: "https://logo.clearbit.com/studiolaffitte.com" },
+    { name: "Genario",         logo: "https://logo.clearbit.com/genario.ai" },
+    { name: "tech Marseille",  logo: "https://logo.clearbit.com/techmarseille.com" },
+  ],
+  sponsors: [
+    { name: "JW Marriott Marseille", logo: "https://logo.clearbit.com/marriott.com" },
+    { name: "CapCut",                logo: "https://logo.clearbit.com/capcut.com" },
+    { name: "Skolae",                logo: "https://logo.clearbit.com/skolae.fr" },
+    { name: "Minimax",               logo: "https://logo.clearbit.com/minimaxi.com" },
+  ],
+  partners: [
+    { name: "Marseille\nCôte d'Azur", logo: "https://logo.clearbit.com/marseille.fr" },
+    { name: "arte",                    logo: "https://logo.clearbit.com/arte.tv" },
+    { name: "CNC",                     logo: "https://logo.clearbit.com/cnc.fr" },
+    { name: "Konbini",                 logo: "https://logo.clearbit.com/konbini.com" },
+    { name: "LCP",                     logo: "https://logo.clearbit.com/lcp.fr",  sub: "ASSEMBLÉE NATIONALE" },
+  ],
+};
+
+const sizeMap = {
+  lg: { fallback: "text-sm md:text-base", sub: "text-[9px]", img: "h-9" },
+  md: { fallback: "text-xs md:text-sm",   sub: "text-[8px]", img: "h-7" },
+  sm: { fallback: "text-xs",              sub: "text-[8px]", img: "h-6" },
+};
+
+function PartnerLogo({ name, logo, sub, size = "md" }) {
+  const sz = sizeMap[size];
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      className="group flex flex-col items-center gap-2 cursor-default opacity-50 hover:opacity-100 transition-opacity duration-300"
+    >
+      <div className="flex flex-col items-center gap-1.5">
+        <img
+          src={logo}
+          alt={name}
+          className={`${sz.img} w-auto max-w-[120px] object-contain brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300`}
+          onError={(e) => {
+            e.target.style.display = "none";
+            const span = document.createElement("span");
+            span.style.cssText = "color:white;font-weight:900;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;text-align:center;line-height:1.2;white-space:pre-line";
+            span.textContent = name;
+            e.target.parentElement.appendChild(span);
+          }}
+        />
+      </div>
+      {sub && (
+        <span className={`${sz.sub} font-bold uppercase tracking-[0.18em] text-white/35 text-center`}>
+          {sub}
+        </span>
+      )}
+    </motion.div>
+  );
+}
+
+function PartnerSectionLabel({ label, color }) {
+  const c = color === "blue"
+    ? "text-[#51A2FF] border-[#51A2FF]/20"
+    : "text-purple-400 border-purple-400/20";
+  return (
+    <div className={`flex items-center gap-4 mb-10 border-t ${c} pt-8`}>
+      <span className={`text-[10px] font-black uppercase tracking-[0.4em] ${c.split(" ")[0]}`}>
+        {label}
+      </span>
+      <div className={`flex-1 h-px ${color === "blue" ? "bg-[#51A2FF]/10" : "bg-purple-400/10"}`} />
+    </div>
+  );
+}
+
+const JURY_MEMBERS = [
+  {
+    name: "Sofia Reyes",
+    role: "Présidente du jury",
+    origin: "Espagne",
+    photo: "https://images.unsplash.com/photo-1494790108755-2616b612b77c?w=400&h=400&fit=crop&crop=faces",
+    accent: "purple",
+  },
+  {
+    name: "Karim Benzali",
+    role: "Réalisateur IA",
+    origin: "France",
+    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=faces",
+    accent: "cyan",
+  },
+  {
+    name: "Yuna Park",
+    role: "Artiste numérique",
+    origin: "Corée du Sud",
+    photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=faces",
+    accent: "pink",
+  },
+  {
+    name: "Marcus Webb",
+    role: "Producteur",
+    origin: "États-Unis",
+    photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=faces",
+    accent: "emerald",
+  },
+  {
+    name: "Amira Khalil",
+    role: "Critique de cinéma",
+    origin: "Maroc",
+    photo: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop&crop=faces",
+    accent: "purple",
+  },
+];
+
+function JuryCard({ name, role, origin, photo, accent }) {
+  const accentMap = {
+    purple: { border: 'border-purple-500/40', ring: 'ring-purple-500/20', badge: 'bg-purple-500/20 text-purple-400', glow: 'shadow-purple-500/20' },
+    cyan:   { border: 'border-[#51A2FF]/40', ring: 'ring-[#51A2FF]/20',   badge: 'bg-[#51A2FF]/20 text-[#51A2FF]',   glow: 'shadow-[#51A2FF]/20' },
+    pink:   { border: 'border-pink-500/40',  ring: 'ring-pink-500/20',    badge: 'bg-pink-500/20 text-pink-400',      glow: 'shadow-pink-500/20' },
+    emerald:{ border: 'border-emerald-500/40',ring: 'ring-emerald-500/20',badge: 'bg-emerald-500/20 text-emerald-400',glow: 'shadow-emerald-500/20' },
+  };
+  const c = accentMap[accent] || accentMap.purple;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      className="flex flex-col items-center text-center group"
+    >
+      <div className={`relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-2 ${c.border} ring-4 ${c.ring} shadow-2xl ${c.glow} mb-5 transition-transform duration-300 group-hover:scale-105`}>
+        <img
+          src={photo}
+          alt={name}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.style.display = 'none';
+            e.target.parentElement.classList.add('bg-white/10', 'flex', 'items-center', 'justify-center');
+          }}
+        />
+      </div>
+
+      <h3 className="text-sm md:text-base font-black uppercase tracking-tight text-white mb-1">
+        {name}
+      </h3>
+      <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.18em] mb-3">
+        {role}
+      </p>
+      <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.12em] ${c.badge}`}>
+        {origin}
+      </span>
+    </motion.div>
   );
 }
