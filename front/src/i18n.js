@@ -95,6 +95,11 @@ i18n.use(initReactI18next).init({
               countries: "Pays représentés",
               films: "Films soumis"
             },
+            jury: {
+              label: "Jury International",
+              title: "Le Jury",
+              description: "Cinq experts reconnus de l'art numérique et du cinéma IA pour évaluer les œuvres en compétition."
+            },
             partners: {
               label: "Partenaires",
               title: "Nos Partenaires Stratégiques"
@@ -148,8 +153,52 @@ i18n.use(initReactI18next).init({
             by: "by"
           },
           agenda: {
-            title: "Agenda",
-            description: "Bienvenue sur la page agenda."
+            infoPratiques: "Infos Pratiques",
+            date: "13 JUIN 2026",
+            city: "MARSEILLE",
+            venueName: "La Plateforme_",
+            venueDesc: "L'épicentre de la révolution créative marseillaise. 4000m² dédiés à l'image et au futur.",
+            programTitle: "Programme des Conférences",
+            conferences: [
+              { type: "Social", title: "Accueil & Café Networking" },
+              { type: "Keynote", title: "Conférence d'ouverture : L'IA au service du Cinéma" },
+              { type: "Break", title: "Déjeuner Libre" },
+              { type: "Cinéma", title: "Projection Sélection Officielle" },
+              { type: "Talk", title: "Table Ronde : Futurs Souhaitables" },
+              { type: "Awards", title: "Grand Prix & Cérémonie de Clôture" },
+              { type: "Party", title: "MARS.A.I Night - DJ Set Immersif" }
+            ],
+            access: {
+              title: "Accès",
+              transport: {
+                title: "Transports en commun",
+                desc: "Tram T2 / T3 - Arrêt Arenc Le Silo.\nMétro M2 - Station Désirée Clary."
+              },
+              car: {
+                title: "Voiture",
+                desc: "Autoroute A55 - Sortie 2.\nParking Indigo Quai du Lazaret à 200m."
+              },
+              address: {
+                title: "Adresse",
+                desc: "12 Rue d'Uzes, 13002 Marseille (Entrée Principale)."
+              },
+              mapAlt: "Carte d'accès"
+            },
+            workshopsSection: {
+              sectionTitle: "Ateliers Pratiques",
+              title: "Workshops",
+              subtitle: "IA Créative",
+              desc: "Passez de la théorie à la pratique avec les meilleurs experts internationaux. Attention, places limitées (max 15 par session).",
+              coach: "Coach",
+              availability: "Disponibilité",
+              reserve: "Réserver ma place",
+              items: [
+                { title: "Génération Vidéo : Les bases", capacity: "10 places restantes" },
+                { title: "IA & Scénario : Co-écriture", capacity: "8 places restantes" },
+                { title: "Post-prod IA & Effets Spéciaux", capacity: "12 places restantes" },
+                { title: "Éthique & Droit de l'IA", capacity: "5 places restantes" }
+              ]
+            }
           },
           profile: {
             follow: "Suivre",
@@ -325,8 +374,52 @@ i18n.use(initReactI18next).init({
             by: "by"
           },
           agenda: {
-            title: "Agenda",
-            description: "Welcome to the agenda page."
+            infoPratiques: "Practical Info",
+            date: "JUNE 13, 2026",
+            city: "MARSEILLE",
+            venueName: "La Plateforme_",
+            venueDesc: "The epicenter of Marseille's creative revolution. 4000m² dedicated to image and the future.",
+            programTitle: "Conference Schedule",
+            conferences: [
+              { type: "Social", title: "Welcome & Networking Coffee" },
+              { type: "Keynote", title: "Opening Conference: AI in the Service of Cinema" },
+              { type: "Break", title: "Free Lunch" },
+              { type: "Cinema", title: "Official Selection Screening" },
+              { type: "Talk", title: "Roundtable: Desirable Futures" },
+              { type: "Awards", title: "Grand Prix & Closing Ceremony" },
+              { type: "Party", title: "MARS.A.I Night - Immersive DJ Set" }
+            ],
+            access: {
+              title: "Access",
+              transport: {
+                title: "Public Transport",
+                desc: "Tram T2 / T3 - Arenc Le Silo stop.\nMetro M2 - Désirée Clary station."
+              },
+              car: {
+                title: "By Car",
+                desc: "Highway A55 - Exit 2.\nIndigo Quai du Lazaret parking 200m away."
+              },
+              address: {
+                title: "Address",
+                desc: "12 Rue d'Uzes, 13002 Marseille (Main Entrance)."
+              },
+              mapAlt: "Access map"
+            },
+            workshopsSection: {
+              sectionTitle: "Practical Workshops",
+              title: "Workshops",
+              subtitle: "Creative AI",
+              desc: "From theory to practice with the best international experts. Note: limited spots (max 15 per session).",
+              coach: "Coach",
+              availability: "Availability",
+              reserve: "Reserve my spot",
+              items: [
+                { title: "Video Generation: The Basics", capacity: "10 spots left" },
+                { title: "AI & Screenplay: Co-writing", capacity: "8 spots left" },
+                { title: "AI Post-prod & Special Effects", capacity: "12 spots left" },
+                { title: "Ethics & AI Law", capacity: "5 spots left" }
+              ]
+            }
           },
           profile: {
             follow: "Follow",

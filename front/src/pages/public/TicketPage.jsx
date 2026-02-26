@@ -244,7 +244,7 @@ export default function TicketPage() {
                     <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
                     <input
                       type="text"
-                      value={currentUser ? currentUser.username : ""}
+                      value={currentUser ? currentUser.email : ""}
                       readOnly
                       placeholder="Connectez-vous pour continuer"
                       className="w-full h-[72px] bg-black/40 border border-white/10 rounded-[28px] pl-16 pr-6 text-sm font-medium text-white/60 cursor-not-allowed"

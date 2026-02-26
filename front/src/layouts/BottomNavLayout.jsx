@@ -4,7 +4,7 @@ import { BottomNavigation } from "./BottomNavBar";
 export default function BottomNavLayout() {
   return (
     <div>
-      <main>
+      <main className="pt-26">
         <Outlet />
       </main>
       <BottomNavigation />

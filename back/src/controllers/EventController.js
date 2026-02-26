@@ -62,10 +62,63 @@ export const deleteEvent = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
+/**
+ * @bref Inscription à un événement (réservation avec ticket)
+ */
+export const registerForEvent = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { ticketType = "standard" } = req.body;
+  const userId = req.user.id;
+  const result = await EventService.registerForEvent(id, userId, ticketType);
+  res.status(201).json(result);
+});
+
+/**
+ * @bref Récupère les réservations de l'utilisateur connecté
+ */
+export const getMyRegistrations = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const registrations = await EventService.getMyRegistrations(userId);
+  res.json(registrations);
+});
+
+/**
+ * @bref Scan d'un QR code (check-in admin)
+ */
+export const scanQrCode = asyncHandler(async (req, res) => {
+  const { qrToken } = req.params;
+  const adminUserId = req.user.id;
+  const result = await EventService.scanQrCode(qrToken, adminUserId);
+  res.json(result);
+});
+
+/**
+ * @bref Liste des inscriptions d'un événement (admin)
+ */
+export const getEventRegistrations = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const registrations = await EventService.getEventRegistrations(id);
+  res.json(registrations);
+});
+
+/**
+ * @bref Historique des scans QR (admin)
+ */
+export const getScanHistory = asyncHandler(async (req, res) => {
+  const adminUserId = req.user.id;
+  const history = await EventService.getScanHistory(adminUserId);
+  res.json(history);
+});
+
 export default {
   getEvents,
   getEventById,
   createEvent,
   updateEvent,
   deleteEvent,
+  registerForEvent,
+  getMyRegistrations,
+  scanQrCode,
+  getEventRegistrations,
+  getScanHistory,
 };

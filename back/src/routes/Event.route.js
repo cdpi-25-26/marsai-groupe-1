@@ -15,16 +15,30 @@ const eventRouter = express.Router();
 eventRouter.use(requireAuth(["ADMIN"]));
 
 /**
- * @bref Routes
+ * @bref Routes publiques / authentifiées
+ */
+// IMPORTANT: les routes fixes doivent être déclarées AVANT les routes paramétriques /:id
+eventRouter.get("/scan-history", requireAuth(["ADMIN"]), EventController.getScanHistory);
+eventRouter.get("/my-registrations", requireAuth(), EventController.getMyRegistrations);
+
+/**
+ * @bref Routes CRUD Admin
  */
 eventRouter.get("/", EventController.getEvents);
 eventRouter.get("/:id", EventController.getEventById);
 eventRouter.post(
   "/",
-  validateRequired(["title", "type", "date", "startTime", "endTime"]),
+  validateRequired(["title", "type", "startDate", "endDate"]),
   EventController.createEvent
 );
 eventRouter.put("/:id", EventController.updateEvent);
 eventRouter.delete("/:id", EventController.deleteEvent);
+
+/**
+ * @bref Routes réservation
+ */
+eventRouter.post("/:id/register", requireAuth(), EventController.registerForEvent);
+eventRouter.get("/:id/registrations", requireAuth(["ADMIN"]), EventController.getEventRegistrations);
+eventRouter.post("/scan/:qrToken", requireAuth(["ADMIN"]), EventController.scanQrCode);
 
 export default eventRouter;

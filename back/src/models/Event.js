@@ -14,42 +14,29 @@ const Event = sequelize.define(
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM("screening", "workshop", "masterclass", "concert", "party"),
+      type: DataTypes.ENUM("workshop", "conference", "projection", "closing"),
       allowNull: false,
     },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    date: {
-      type: DataTypes.DATEONLY,
+    startDate: {
+      type: DataTypes.DATE,
       allowNull: false,
-      comment: "Date de l'événement (YYYY-MM-DD)",
     },
-    startTime: {
-      type: DataTypes.STRING(5),
+    endDate: {
+      type: DataTypes.DATE,
       allowNull: false,
-      comment: "Heure de début (HH:MM)",
     },
-    endTime: {
-      type: DataTypes.STRING(5),
-      allowNull: false,
-      comment: "Heure de fin (HH:MM)",
+    maxParticipants: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: "Jauge max (null = illimité)",
     },
     location: {
       type: DataTypes.STRING(255),
       allowNull: true,
-    },
-    capacity: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
-      comment: "Capacité maximale",
-    },
-    status: {
-      type: DataTypes.ENUM("upcoming", "ongoing", "completed", "cancelled"),
-      allowNull: false,
-      defaultValue: "upcoming",
     },
   },
   {

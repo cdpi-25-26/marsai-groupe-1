@@ -32,6 +32,10 @@ import UploadPage from "./pages/public/Upload.jsx";
 import JuryVotePage from "./pages/jury/jury-page.jsx";
 import Detail from "./pages/public/Details.jsx";
 import { AgendaPage } from "./pages/public/Agenda.jsx";
+import TicketPage from "./pages/public/TicketPage.jsx";
+import ScannerPage from "./pages/public/ScannerPage.jsx";
+import ScanHistoryPage from "./pages/public/ScanHistoryPage.jsx";
+import QRGeneratorPage from "./pages/public/QRGeneratorPage.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,13 +62,18 @@ createRoot(document.getElementById("root")).render(
               <Route path="/upload" element={<UploadPage />} />
               <Route path="/jury/:filmId" element={<JuryVotePage />} />
               <Route path="/soumission" element={<UploadPage />} />
-              <Route path="/film/:id" element={<Detail />} />
+              <Route path="/ticket" element={<TicketPage />} />
+              <Route path="/scanner" element={<ScannerPage />} />
+              <Route path="/scan-history" element={<ScanHistoryPage />} />
+              <Route path="/qr-generator" element={<QRGeneratorPage />} />
             </Route>
             
             {/* Routes avec Bottom Navigation uniquement */}
             <Route path="/" element={<BottomNavLayout />}>
               <Route path="/discover" element={<Discover />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/film/:id" element={<Detail />} />
+
             </Route>
             {/* Routes admin */}
             <Route

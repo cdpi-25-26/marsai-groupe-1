@@ -275,6 +275,34 @@ export function LandingPage({ onNavigate }) {
           </div>
         </div>
       </section>
+       {/* Section: Jury */}
+      <section className="py-20 md:py-32 px-4 md:px-6 bg-[#080808]">
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="text-center mb-16 md:mb-24">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="w-8 md:w-12 h-px bg-[#51A2FF]" />
+              <span className="text-[#51A2FF] font-bold uppercase tracking-[0.4em] text-xs">
+                {t('pages.landing.jury.label')}
+              </span>
+              <div className="w-8 md:w-12 h-px bg-[#51A2FF]" />
+            </div>
+            <h2 className="text-4xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-[0.95] mb-6">
+              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/20">
+                {t('pages.landing.jury.title')}
+              </span>
+            </h2>
+            <p className="text-white/30 text-lg md:text-xl font-normal max-w-xl mx-auto leading-relaxed">
+              {t('pages.landing.jury.description')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
+            {JURY_MEMBERS.map((member) => (
+              <JuryCard key={member.name} {...member} />
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Section: Partenaires */}
       <section className="py-20 md:py-32 px-4 md:px-6">
@@ -298,7 +326,7 @@ export function LandingPage({ onNavigate }) {
               >
                 <ImageWithFallback
                   src={logo}
-                  className="max-h-10 md:max-h-12 w-auto object-contain transition-transform duration-500 group-hover:scale-110 opacity-60 group-hover:opacity-100"
+                  className="max-h-10 md:max-h-12 w-auto object-contain transition-transform duration-500 group-hover:scale-110 group-hover:opacity-100"
                 />
               </div>
             ))}
@@ -308,7 +336,6 @@ export function LandingPage({ onNavigate }) {
 
       {/* Footer */}
       <FooterLayout></FooterLayout>
-    
     </div>
   );
 }
@@ -405,5 +432,85 @@ function StatCard({ value, label, color }) {
       <span className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-2 text-white">{value}</span>
       <span className={`font-black uppercase tracking-[0.4em] text-[10px] ${colorMap[color]}`}>{label}</span>
     </div>
+  );
+}
+
+const JURY_MEMBERS = [
+  {
+    name: "Sofia Reyes",
+    role: "Présidente du jury",
+    origin: "Espagne",
+    photo: "https://images.unsplash.com/photo-1494790108755-2616b612b77c?w=400&h=400&fit=crop&crop=faces",
+    accent: "purple",
+  },
+  {
+    name: "Karim Benzali",
+    role: "Réalisateur IA",
+    origin: "France",
+    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=faces",
+    accent: "cyan",
+  },
+  {
+    name: "Yuna Park",
+    role: "Artiste numérique",
+    origin: "Corée du Sud",
+    photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=faces",
+    accent: "pink",
+  },
+  {
+    name: "Marcus Webb",
+    role: "Producteur",
+    origin: "États-Unis",
+    photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=faces",
+    accent: "emerald",
+  },
+  {
+    name: "Amira Khalil",
+    role: "Critique de cinéma",
+    origin: "Maroc",
+    photo: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop&crop=faces",
+    accent: "purple",
+  },
+];
+
+function JuryCard({ name, role, origin, photo, accent }) {
+  const accentMap = {
+    purple: { border: 'border-purple-500/40', ring: 'ring-purple-500/20', badge: 'bg-purple-500/20 text-purple-400', glow: 'shadow-purple-500/20' },
+    cyan:   { border: 'border-[#51A2FF]/40', ring: 'ring-[#51A2FF]/20',   badge: 'bg-[#51A2FF]/20 text-[#51A2FF]',   glow: 'shadow-[#51A2FF]/20' },
+    pink:   { border: 'border-pink-500/40',  ring: 'ring-pink-500/20',    badge: 'bg-pink-500/20 text-pink-400',      glow: 'shadow-pink-500/20' },
+    emerald:{ border: 'border-emerald-500/40',ring: 'ring-emerald-500/20',badge: 'bg-emerald-500/20 text-emerald-400',glow: 'shadow-emerald-500/20' },
+  };
+  const c = accentMap[accent] || accentMap.purple;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      className="flex flex-col items-center text-center group"
+    >
+      <div className={`relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-2 ${c.border} ring-4 ${c.ring} shadow-2xl ${c.glow} mb-5 transition-transform duration-300 group-hover:scale-105`}>
+        <img
+          src={photo}
+          alt={name}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.style.display = 'none';
+            e.target.parentElement.classList.add('bg-white/10', 'flex', 'items-center', 'justify-center');
+          }}
+        />
+      </div>
+
+      <h3 className="text-sm md:text-base font-black uppercase tracking-tight text-white mb-1">
+        {name}
+      </h3>
+      <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.18em] mb-3">
+        {role}
+      </p>
+      <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.12em] ${c.badge}`}>
+        {origin}
+      </span>
+    </motion.div>
   );
 }

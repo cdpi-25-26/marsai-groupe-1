@@ -2,8 +2,10 @@
  * @bref Service Event - Logique métier pour les événements
  */
 
+import crypto from "crypto";
 import Event from "../models/Event.js";
 import EventRegistration from "../models/EventRegistration.js";
+import ScanLog from "../models/ScanLog.js";
 import User from "../models/User.js";
 import NotificationService from "./NotificationService.js";
 import { AppError } from "../middlewares/errorHandler.js";
@@ -91,24 +93,20 @@ class EventService {
         title,
         type,
         description,
-        date,
-        startTime,
-        endTime,
+        startDate,
+        endDate,
         location,
-        capacity,
-        status,
+        maxParticipants,
       } = eventData;
 
       const newEvent = await Event.create({
         title,
         type,
         description: description || null,
-        date,
-        startTime,
-        endTime,
+        startDate,
+        endDate,
         location: location || null,
-        capacity: capacity || 0,
-        status: status || "upcoming",
+        maxParticipants: maxParticipants || null,
       });
 
       logger.info("Event created", { eventId: newEvent.id, title: newEvent.title });
@@ -148,50 +146,21 @@ class EventService {
         title,
         type,
         description,
-        date,
-        startTime,
-        endTime,
+        startDate,
+        endDate,
         location,
-        capacity,
-        status,
+        maxParticipants,
       } = eventData;
-
-      const oldStatus = event.status;
 
       if (title != null) event.title = title;
       if (type != null) event.type = type;
       if (description != null) event.description = description;
-      if (date != null) event.date = date;
-      if (startTime != null) event.startTime = startTime;
-      if (endTime != null) event.endTime = endTime;
+      if (startDate != null) event.startDate = startDate;
+      if (endDate != null) event.endDate = endDate;
       if (location != null) event.location = location;
-      if (capacity != null) event.capacity = capacity;
-      if (status != null) event.status = status;
+      if (maxParticipants != null) event.maxParticipants = maxParticipants;
 
       await event.save();
-
-      /**
-       * @bref Envoyer notification si statut change vers "confirmed" ou "cancelled"
-       */
-      if (status && status !== oldStatus) {
-        try {
-          if (status === "confirmed") {
-            await this.notifyRegisteredUsers(
-              id,
-              "Événement confirmé",
-              `L'événement "${event.title}" a été confirmé. Détails: ${location || "Lieu à confirmer"} le ${date}`
-            );
-          } else if (status === "cancelled") {
-            await this.notifyRegisteredUsers(
-              id,
-              "Événement annulé",
-              `L'événement "${event.title}" a été annulé.`
-            );
-          }
-        } catch (err) {
-          logger.warn("Error sending event status notification", { eventId: id, newStatus: status, error: err.message });
-        }
-      }
 
       const registrations = await EventRegistration.count({
         where: { eventId: id },
@@ -287,6 +256,115 @@ class EventService {
       logger.error("Error notifying registered users", { eventId, error: error.message });
       throw error;
     }
+  }
+
+  /**
+   * @bref Inscription d'un utilisateur à un événement (réservation + QR)
+   */
+  async registerForEvent(eventId, userId, ticketType = "standard") {
+    const event = await Event.findByPk(eventId);
+    if (!event) throw new AppError("Événement introuvable", 404);
+
+    const existing = await EventRegistration.findOne({ where: { eventId, userId } });
+    if (existing) throw new AppError("Vous êtes déjà inscrit à cet événement", 409);
+
+    if (event.maxParticipants != null) {
+      const count = await EventRegistration.count({ where: { eventId } });
+      if (count >= event.maxParticipants) throw new AppError("Événement complet", 409);
+    }
+
+    const qrToken = crypto.randomBytes(32).toString("hex");
+    const registration = await EventRegistration.create({
+      eventId,
+      userId,
+      ticketType,
+      qrToken,
+    });
+
+    logger.info("Event registration created", { eventId, userId, ticketType });
+    return { registration, event };
+  }
+
+  /**
+   * @bref Récupère les réservations de l'utilisateur connecté
+   */
+  async getMyRegistrations(userId) {
+    return EventRegistration.findAll({
+      where: { userId },
+      include: [{ model: Event }],
+      order: [["createdAt", "DESC"]],
+    });
+  }
+
+  /**
+   * @bref Scan d'un QR code (check-in admin)
+   */
+  async scanQrCode(qrToken, adminUserId) {
+    const registration = await EventRegistration.findOne({
+      where: { qrToken },
+      include: [
+        { model: User, attributes: ["id", "username", "email", "role"] },
+        { model: Event },
+      ],
+    });
+
+    if (!registration) {
+      await ScanLog.create({ qrToken, scannedByUserId: adminUserId, status: "invalid", message: "Ticket introuvable" });
+      throw new AppError("Ticket introuvable", 404);
+    }
+
+    if (registration.revokedAt) {
+      await ScanLog.create({ qrToken, scannedByUserId: adminUserId, registrationId: registration.id, status: "revoked", message: "Ticket révoqué" });
+      throw new AppError("Ticket révoqué", 400);
+    }
+
+    if (registration.expiresAt && new Date() > new Date(registration.expiresAt)) {
+      await ScanLog.create({ qrToken, scannedByUserId: adminUserId, registrationId: registration.id, status: "expired", message: "QR code expiré" });
+      throw new AppError("QR code expiré", 400);
+    }
+
+    await registration.update({
+      checkedInAt: registration.checkedInAt || new Date(),
+      checkedInByUserId: adminUserId,
+      checkInCount: registration.checkInCount + 1,
+    });
+
+    await ScanLog.create({ qrToken, scannedByUserId: adminUserId, registrationId: registration.id, status: "valid" });
+
+    logger.info("QR scan successful", { qrToken, adminUserId, registrationId: registration.id });
+    return registration;
+  }
+
+  /**
+   * @bref Historique des scans QR (admin)
+   */
+  async getScanHistory(adminUserId, limit = 100) {
+    return ScanLog.findAll({
+      where: { scannedByUserId: adminUserId },
+      include: [
+        {
+          model: EventRegistration,
+          as: "registration",
+          include: [
+            { model: User, attributes: ["id", "username", "email"] },
+            { model: Event, attributes: ["id", "title"] },
+          ],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+      limit,
+    });
+  }
+
+  /**
+   * @bref Liste des inscriptions d'un événement (admin)
+   */
+  async getEventRegistrations(eventId) {
+    return EventRegistration.findAll({
+      where: { eventId },
+      include: [{ model: User, attributes: ["id", "username", "email", "role"] }],
+      order: [["createdAt", "ASC"]],
+    });
   }
 }
 

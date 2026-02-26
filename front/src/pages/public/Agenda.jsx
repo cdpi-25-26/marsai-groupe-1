@@ -1,11 +1,12 @@
 import { motion } from "motion/react";
-import { 
-  MapPin, 
-  Clock, 
-  Calendar, 
-  TrainFront, 
-  Car, 
-  Navigation, 
+import { useTranslation } from "react-i18next";
+import {
+  MapPin,
+  Clock,
+  Calendar,
+  TrainFront,
+  Car,
+  Navigation,
   Sparkles,
   Users
 } from "lucide-react";
@@ -17,24 +18,24 @@ import { ImageWithFallback } from "../../components/common/ImageWithFallBack";
 import imgMap from "../../assets/Image/8bda8b1a311ace4c1ca756fc036b819a50be97fb.png";
 import FooterLayout from "../../layouts/FooterLayout";
 
-const conferences = [
-  { time: "09:30", type: "Social", title: "Accueil & Café Networking", color: "text-emerald-400" },
-  { time: "10:30", type: "Keynote", title: "Conférence d'ouverture : L'IA au service du Cinéma", color: "text-purple-400" },
-  { time: "13:00", type: "Break", title: "Déjeuner Libre", color: "text-[#51A2FF]/50" },
-  { time: "14:30", type: "Cinéma", title: "Projection Sélection Officielle", color: "text-pink-400" },
-  { time: "16:30", type: "Talk", title: "Table Ronde : Futurs Souhaitables", color: "text-pink-400" },
-  { time: "19:00", type: "Awards", title: "Grand Prix & Cérémonie de Clôture", color: "text-purple-400" },
-  { time: "21:00", type: "Party", title: "MARS.A.I Night - DJ Set Immersif", color: "text-[#51A2FF]" },
+const conferenceColors = [
+  "text-emerald-400",
+  "text-purple-400",
+  "text-[#51A2FF]/50",
+  "text-pink-400",
+  "text-pink-400",
+  "text-purple-400",
+  "text-[#51A2FF]",
 ];
 
-const workshops = [
-  { time: "14h30", title: "Génération Vidéo : Les bases", coach: "Thomas Aubert", capacity: "10 places restantes" },
-  { time: "15h45", title: "IA & Scénario : Co-écriture", coach: "Thomas Aubert", capacity: "8 places restantes" },
-  { time: "17h00", title: "Post-prod IA & Effets Spéciaux", coach: "Thomas Aubert", capacity: "12 places restantes" },
-  { time: "18h15", title: "Éthique & Droit de l'IA", coach: "Nicolas Lambert", capacity: "5 places restantes" },
-];
+const conferenceTimes = ["09:30", "10:30", "13:00", "14:30", "16:30", "19:00", "21:00"];
+
+const workshopTimes = ["14h30", "15h45", "17h00", "18h15"];
+const workshopCoaches = ["Thomas Aubert", "Thomas Aubert", "Thomas Aubert", "Nicolas Lambert"];
 
 export function AgendaPage({ onNavigate }) {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 font-['Arimo']">
       <TopBar onNavigate={onNavigate} currentPage="agenda" />
@@ -56,13 +57,13 @@ export function AgendaPage({ onNavigate }) {
         >
           <div className="flex items-center gap-2 text-purple-500 mb-4">
             <Calendar className="w-5 h-5" />
-            <span className="text-sm font-bold uppercase tracking-[0.3em]">Infos Pratiques</span>
+            <span className="text-sm font-bold uppercase tracking-[0.3em]">{t("pages.agenda.infoPratiques")}</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight">
-            13 JUIN 2026
+            {t("pages.agenda.date")}
           </h1>
           <h2 className="text-3xl md:text-4xl font-black text-purple-500 mb-8">
-            MARSEILLE
+            {t("pages.agenda.city")}
           </h2>
 
           <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[32px] p-8 shadow-2xl">
@@ -70,10 +71,10 @@ export function AgendaPage({ onNavigate }) {
               <div className="bg-pink-500/20 p-3 rounded-[24px]">
                 <MapPin className="w-6 h-6 text-pink-400" />
               </div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter">La Plateforme_</h3>
+              <h3 className="text-2xl font-black uppercase tracking-tighter">{t("pages.agenda.venueName")}</h3>
             </div>
             <p className="text-white/60 leading-relaxed">
-              L'épicentre de la révolution créative marseillaise. 4000m² dédiés à l'image et au futur.
+              {t("pages.agenda.venueDesc")}
             </p>
           </div>
         </motion.div>
@@ -82,11 +83,11 @@ export function AgendaPage({ onNavigate }) {
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-8 border-b-2 border-purple-500/30 pb-4 inline-flex">
             <Clock className="w-6 h-6 text-purple-400" />
-            <h3 className="text-2xl font-black uppercase tracking-tighter">Programme des Conférences</h3>
+            <h3 className="text-2xl font-black uppercase tracking-tighter">{t("pages.agenda.programTitle")}</h3>
           </div>
 
           <div className="space-y-4">
-            {conferences.map((event, idx) => (
+            {conferenceTimes.map((time, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 20 }}
@@ -94,17 +95,17 @@ export function AgendaPage({ onNavigate }) {
                 transition={{ delay: idx * 0.1 }}
                 className="group relative"
               >
-                <div className={`absolute inset-0 bg-gradient-to-r ${event.color.replace('text', 'from')}/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[24px]`} />
+                <div className={`absolute inset-0 bg-gradient-to-r ${conferenceColors[idx].replace('text', 'from')}/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[24px]`} />
                 <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-[24px] p-6 flex items-center gap-8 group-hover:bg-white/10 transition-all duration-300">
-                  <div className={`text-2xl font-black ${event.color} shrink-0 tabular-nums`}>
-                    {event.time}
+                  <div className={`text-2xl font-black ${conferenceColors[idx]} shrink-0 tabular-nums`}>
+                    {time}
                   </div>
                   <div className="flex flex-col">
-                    <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${event.color}`}>
-                      {event.type}
+                    <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${conferenceColors[idx]}`}>
+                      {t(`pages.agenda.conferences.${idx}.type`)}
                     </span>
                     <h4 className="text-lg font-bold leading-tight text-white/90">
-                      {event.title}
+                      {t(`pages.agenda.conferences.${idx}.title`)}
                     </h4>
                   </div>
                 </div>
@@ -117,7 +118,7 @@ export function AgendaPage({ onNavigate }) {
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-8 border-b-2 border-[#51A2FF]/30 pb-4 inline-flex">
             <Navigation className="w-6 h-6 text-[#51A2FF]" />
-            <h3 className="text-2xl font-black uppercase tracking-tighter">Accès</h3>
+            <h3 className="text-2xl font-black uppercase tracking-tighter">{t("pages.agenda.access.title")}</h3>
           </div>
 
           <div className="space-y-6 mb-8">
@@ -126,9 +127,9 @@ export function AgendaPage({ onNavigate }) {
                 <TrainFront className="w-6 h-6 text-[#51A2FF]" />
               </div>
               <div>
-                <h4 className="text-lg font-black mb-1">Transports en commun</h4>
-                <p className="text-white/50 text-sm leading-relaxed">
-                  Tram T2 / T3 - Arrêt Arenc Le Silo.<br />Métro M2 - Station Désirée Clary.
+                <h4 className="text-lg font-black mb-1">{t("pages.agenda.access.transport.title")}</h4>
+                <p className="text-white/50 text-sm leading-relaxed" style={{ whiteSpace: "pre-line" }}>
+                  {t("pages.agenda.access.transport.desc")}
                 </p>
               </div>
             </div>
@@ -138,9 +139,9 @@ export function AgendaPage({ onNavigate }) {
                 <Car className="w-6 h-6 text-pink-400" />
               </div>
               <div>
-                <h4 className="text-lg font-black mb-1">Voiture</h4>
-                <p className="text-white/50 text-sm leading-relaxed">
-                  Autoroute A55 - Sortie 2.<br />Parking Indigo Quai du Lazaret à 200m.
+                <h4 className="text-lg font-black mb-1">{t("pages.agenda.access.car.title")}</h4>
+                <p className="text-white/50 text-sm leading-relaxed" style={{ whiteSpace: "pre-line" }}>
+                  {t("pages.agenda.access.car.desc")}
                 </p>
               </div>
             </div>
@@ -150,18 +151,18 @@ export function AgendaPage({ onNavigate }) {
                 <MapPin className="w-6 h-6 text-purple-400" />
               </div>
               <div>
-                <h4 className="text-lg font-black mb-1">Adresse</h4>
+                <h4 className="text-lg font-black mb-1">{t("pages.agenda.access.address.title")}</h4>
                 <p className="text-white/50 text-sm leading-relaxed">
-                  12 Rue d'Uzes, 13002 Marseille (Entrée Principale).
+                  {t("pages.agenda.access.address.desc")}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="aspect-video w-full rounded-[32px] overflow-hidden border border-white/10 relative group">
-            <ImageWithFallback 
-              src={imgMap} 
-              alt="Carte d'accès" 
+            <ImageWithFallback
+              src={imgMap}
+              alt={t("pages.agenda.access.mapAlt")}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
@@ -177,42 +178,41 @@ export function AgendaPage({ onNavigate }) {
             >
               <Sparkles className="w-6 h-6 text-pink-500" />
             </motion.div>
-            <h3 className="text-2xl font-black uppercase tracking-tighter">Ateliers Pratiques</h3>
+            <h3 className="text-2xl font-black uppercase tracking-tighter">{t("pages.agenda.workshopsSection.sectionTitle")}</h3>
           </div>
 
           <div className="bg-gradient-to-br from-white/10 to-transparent backdrop-blur-2xl border border-white/10 rounded-[32px] p-6 md:p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-8">
               <h4 className="text-3xl font-black uppercase tracking-tighter">
-                Workshops<br />
-                <span className="text-pink-500">IA Créative</span>
+                {t("pages.agenda.workshopsSection.title")}<br />
+                <span className="text-pink-500">{t("pages.agenda.workshopsSection.subtitle")}</span>
               </h4>
               <Users className="w-10 h-10 text-pink-500/30" />
             </div>
-            
+
             <p className="text-white/50 text-xs uppercase tracking-widest mb-10 leading-relaxed">
-              Passez de la théorie à la pratique avec les meilleurs experts internationaux. 
-              Attention, places limitées (max 15 par session).
+              {t("pages.agenda.workshopsSection.desc")}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {workshops.map((ws, idx) => (
-                <div 
+              {workshopTimes.map((time, idx) => (
+                <div
                   key={idx}
                   className="bg-white/5 backdrop-blur-md border border-white/5 rounded-[24px] p-6 flex flex-col justify-between hover:bg-white/10 transition-colors duration-300"
                 >
                   <div>
-                    <span className="text-[#51A2FF] text-sm font-black mb-3 block">{ws.time}</span>
-                    <h5 className="text-lg font-black leading-tight mb-2 uppercase">{ws.title}</h5>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-6">Coach : {ws.coach}</p>
+                    <span className="text-[#51A2FF] text-sm font-black mb-3 block">{time}</span>
+                    <h5 className="text-lg font-black leading-tight mb-2 uppercase">{t(`pages.agenda.workshopsSection.items.${idx}.title`)}</h5>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-6">{t("pages.agenda.workshopsSection.coach")} : {workshopCoaches[idx]}</p>
                   </div>
-                  
+
                   <div className="mt-auto">
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-4">
-                      <span className="text-white/40">Disponibilité</span>
-                      <span className="text-[#51A2FF]">{ws.capacity}</span>
+                      <span className="text-white/40">{t("pages.agenda.workshopsSection.availability")}</span>
+                      <span className="text-[#51A2FF]">{t(`pages.agenda.workshopsSection.items.${idx}.capacity`)}</span>
                     </div>
                     <button className="w-full bg-white text-black font-black py-4 rounded-[24px] uppercase text-xs tracking-widest hover:bg-[#51A2FF] hover:text-white transition-all duration-300 cursor-pointer">
-                      Réserver ma place
+                      {t("pages.agenda.workshopsSection.reserve")}
                     </button>
                   </div>
                 </div>

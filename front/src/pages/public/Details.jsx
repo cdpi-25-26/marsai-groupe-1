@@ -69,7 +69,7 @@ export default function Detail() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="w-full min-h-screen text-foreground font-['Arimo'] -mt-52 pt-12"
+      className="w-full min-h-screen text-foreground font-['Arimo'] -mt-52"
     >
       {/* Cinematic Hero */}
       <div className="relative h-[60vh] sm:h-[75vh] md:h-screen w-full">
