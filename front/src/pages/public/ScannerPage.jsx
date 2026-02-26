@@ -93,9 +93,8 @@ export default function ScannerPage() {
         lastScannedRef.current = code.data;
         processingRef.current  = true;
         processToken(code.data).finally(() => { processingRef.current = false; });
-      } else {
-        tick();
       }
+      tick();
     });
   };
 
@@ -149,7 +148,6 @@ export default function ScannerPage() {
     setManualToken("");
     lastScannedRef.current = null;
     processingRef.current  = false;
-    if (mode === "camera") tick();
   };
 
   if (!currentUser) {
