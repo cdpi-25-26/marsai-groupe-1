@@ -15,7 +15,8 @@ import { RoleGuard } from "./middlewares/RoleGuard.jsx";
 import Agenda from "./pages/public/Agenda.jsx";
 import Discover from "./pages/public/Discover.jsx";
 import Competition from "./pages/public/Competition.jsx";
-import Profile from "./pages/public/Profile.jsx"; 
+import Profile from "./pages/public/Profile.jsx";
+import Submit from "./pages/public/Submit.jsx";
 import JuryDashboard from "./pages/admin/JuryDashboard.jsx";
 
 
@@ -38,9 +39,10 @@ createRoot(document.getElementById("root")).render(
             <Route path="/auth/login" element={<Login />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/competition" element={<Competition />} />
-            <Route path="/Agenda" element={<Agenda />} />
-            <Route path="/Profile" element={<Profile />} />
+            <Route path="/agenda" element={<Agenda />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/auth/register" element={<Register />} />
+            <Route path="/submit" element={<Submit />} />
             <Route path="/jury-dashboard" element={<JuryDashboard />} />
           </Route>
 

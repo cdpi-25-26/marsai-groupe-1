@@ -6,6 +6,7 @@
 import sequelize from "../db/connection.js";
 import User from "./User.js";
 import Film from "./Film.js";
+import Category from "./Category.js";
 import Video from "./Video.js";
 import JuryRating from "./JuryRating.js";
 import NewsletterSubscriber from "./NewsletterSubscriber.js";
@@ -17,6 +18,12 @@ import SubmissionConfig from "./SubmissionConfig.js";
 /**
  * @bref Associations
  */
+
+/**
+ * @bref Category <-> Film
+ */
+Category.hasMany(Film, { foreignKey: "categoryId" });
+Film.belongsTo(Category, { foreignKey: "categoryId" });
 
 /**
  * @bref User <-> Film (Réalisateur soumet des films)
@@ -68,6 +75,7 @@ export {
   sequelize,
   User,
   Film,
+  Category,
   Video,
   JuryRating,
   NewsletterSubscriber,
@@ -81,6 +89,7 @@ export default {
   sequelize,
   User,
   Film,
+  Category,
   Video,
   JuryRating,
   NewsletterSubscriber,

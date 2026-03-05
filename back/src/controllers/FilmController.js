@@ -11,15 +11,16 @@ import logger from "../utils/logger.js";
  * @bref Récupère tous les films avec filtres et pagination (galerie publique)
  */
 export const getFilms = asyncHandler(async (req, res) => {
-  const { status, country, page, limit } = req.query;
+  const { status, country, category, page, limit } = req.query;
   const result = await FilmService.getAllFilms({
     status,
     country,
+    category,
     page,
     limit,
     includeUser: true,
   });
-  logger.info("Films fetched", { count: result.films.length, filters: { status, country } });
+  logger.info("Films fetched", { count: result.films.length, filters: { status, country, category } });
   res.json(result);
 });
 

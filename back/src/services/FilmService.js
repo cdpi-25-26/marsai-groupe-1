@@ -1,9 +1,10 @@
-/**
+  jjh/**
  * @bref Service Film - Logique métier pour les films
  * Gère le workflow de soumission, modération, sélection officielle
  */
 
 import Film, { FILM_STATUS } from "../models/Film.js";
+import Category from "../models/Category.js";
 import User from "../models/User.js";
 import SubmissionConfig from "../models/SubmissionConfig.js";
 import Notification from "../models/Notification.js";
@@ -76,6 +77,7 @@ class FilmService {
       const {
         status,
         country,
+        category,
         page = 1,
         limit = 20,
         includeUser = false,
@@ -84,14 +86,18 @@ class FilmService {
       const where = {};
       if (status) where.status = status;
       if (country) where.country = country.toUpperCase();
+      if (category) where.categoryId = category;
 
       const offset = (page - 1) * limit;
+
+      const include = [{ model: Category, attributes: ["id", "name"] }];
+      if (includeUser) include.push({ model: User, attributes: ["id", "username", "country"] });
 
       const { count, rows } = await Film.findAndCountAll({
         where,
         limit: parseInt(limit),
         offset: parseInt(offset),
-        include: includeUser ? [{ model: User, attributes: ["id", "username", "country"] }] : [],
+        include,
         order: [["created_at", "DESC"]],
       });
 
@@ -119,7 +125,10 @@ class FilmService {
   async getFilmById(id, includeUser = false) {
     try {
       const film = await Film.findByPk(id, {
-        include: includeUser ? [{ model: User, attributes: ["id", "username", "biography", "country"] }] : [],
+        include: [
+          { model: Category, attributes: ["id", "name"] },
+          ...(includeUser ? [{ model: User, attributes: ["id", "username", "biography", "country"] }] : []),
+        ],
       });
 
       if (!film) {
@@ -154,6 +163,7 @@ class FilmService {
         youtubeId,
         posterPath,
         country,
+        categoryId,
         aiIdentity,
       } = filmData;
 
@@ -172,6 +182,7 @@ class FilmService {
         youtubeId,
         posterPath,
         country,
+        categoryId: categoryId || null,
         aiIdentity: aiIdentity || {},
         userId,
         status: "PENDING",
@@ -302,7 +313,10 @@ class FilmService {
     try {
       const films = await Film.findAll({
         where: { status: "SELECTION_OFFICIELLE" },
-        include: [{ model: User, attributes: ["id", "username", "country"] }],
+        include: [
+          { model: Category, attributes: ["id", "name"] },
+          { model: User, attributes: ["id", "username", "country"] },
+        ],
         order: [["created_at", "DESC"]],
       });
 

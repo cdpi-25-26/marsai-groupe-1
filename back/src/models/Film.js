@@ -53,6 +53,13 @@ const Film = sequelize.define(
       type: DataTypes.STRING(500),
       allowNull: true,
     },
+    // Catégorie du film (clé étrangère vers Category)
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "categories", key: "id" },
+      onDelete: "SET NULL",
+    },
     // Pays du réalisateur au moment de la soumission (filtre galerie CdC §5.1)
     country: {
       type: DataTypes.STRING(3),
