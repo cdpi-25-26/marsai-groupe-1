@@ -7,6 +7,8 @@ import sequelize from "../db/connection.js";
 import User from "./User.js";
 import Film from "./Film.js";
 import FilmSubtitle from "./FilmSubtitle.js";
+import FilmLike from "./FilmLike.js";
+import FilmComment from "./FilmComment.js";
 import VideoUpload from "./VideoUpload.js";
 import JuryRating from "./JuryRating.js";
 import NewsletterSubscriber from "./NewsletterSubscriber.js";
@@ -92,11 +94,29 @@ Film.belongsTo(VideoUpload, { foreignKey: "videoUploadId", as: "videoUpload" });
 Film.hasMany(FilmSubtitle, { foreignKey: "filmId", as: "subtitles" });
 FilmSubtitle.belongsTo(Film, { foreignKey: "filmId", as: "film" });
 
+/**
+ * @bref Film <-> FilmLike (likes des utilisateurs)
+ */
+Film.hasMany(FilmLike, { foreignKey: "filmId", as: "likes" });
+FilmLike.belongsTo(Film, { foreignKey: "filmId" });
+User.hasMany(FilmLike, { foreignKey: "userId", as: "filmLikes" });
+FilmLike.belongsTo(User, { foreignKey: "userId" });
+
+/**
+ * @bref Film <-> FilmComment (commentaires multiples)
+ */
+Film.hasMany(FilmComment, { foreignKey: "filmId", as: "comments" });
+FilmComment.belongsTo(Film, { foreignKey: "filmId" });
+User.hasMany(FilmComment, { foreignKey: "userId", as: "filmComments" });
+FilmComment.belongsTo(User, { foreignKey: "userId" });
+
 export {
   sequelize,
   User,
   Film,
   FilmSubtitle,
+  FilmLike,
+  FilmComment,
   VideoUpload,
   JuryRating,
   NewsletterSubscriber,
@@ -112,6 +132,8 @@ export default {
   User,
   Film,
   FilmSubtitle,
+  FilmLike,
+  FilmComment,
   VideoUpload,
   JuryRating,
   NewsletterSubscriber,

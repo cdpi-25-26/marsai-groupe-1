@@ -265,19 +265,19 @@ async function main() {
   log("Création des votes jury...");
 
   await JuryRating.bulkCreate([
-    { filmId: 1,  userId: jury1.id, score: "TRES_BIEN",  internalComment: "Visuellement époustouflant. Top de la sélection." },
-    { filmId: 2,  userId: jury1.id, score: "BIEN",       internalComment: "Bonne narration, mais un peu long." },
-    { filmId: 3,  userId: jury1.id, score: "TRES_BIEN",  internalComment: "Très émouvant. Osé et réussi." },
-    { filmId: 4,  userId: jury1.id, score: "BIEN",       internalComment: "Intéressant philosophiquement mais manque de rythme." },
-    { filmId: 5,  userId: jury1.id, score: "BOF",        internalComment: "Concept intéressant mais trop répétitif visuellement." },
-    { filmId: 7,  userId: jury1.id, score: "TRES_BIEN",  internalComment: "Poétique et maîtrisé. Bande son parfaite." },
-    { filmId: 8,  userId: jury1.id, score: "BIEN",       internalComment: "Thriller efficace, quelques longueurs." },
-    { filmId: 10, userId: jury1.id, score: "JAIME_PAS",  internalComment: "Trop abstrait malgré les belles images." },
-    { filmId: 1,  userId: jury2.id, score: "BIEN",       internalComment: "Techniquement impressionnant mais narrativement creux." },
-    { filmId: 2,  userId: jury2.id, score: "TRES_BIEN",  internalComment: "Le meilleur film de la sélection selon moi." },
-    { filmId: 6,  userId: jury2.id, score: "TRES_BIEN",  internalComment: "L'esthétique pixel art est parfaitement maîtrisée." },
-    { filmId: 9,  userId: jury2.id, score: "BOF",        internalComment: "La thématique spiritualité + IA est surexploitée." },
-    { filmId: 11, userId: jury2.id, score: "BIEN",       internalComment: "Atmosphère cyberpunk réussie." },
+    { filmId: 1,  userId: jury1.id, score: "JAIME",       internalComment: "Visuellement époustouflant. Top de la sélection." },
+    { filmId: 2,  userId: jury1.id, score: "JAIME",       internalComment: "Bonne narration, très prometteur." },
+    { filmId: 3,  userId: jury1.id, score: "JAIME",       internalComment: "Très émouvant. Osé et réussi." },
+    { filmId: 4,  userId: jury1.id, score: "A_DEBATTRE",  internalComment: "Intéressant philosophiquement mais manque de rythme." },
+    { filmId: 5,  userId: jury1.id, score: "A_DEBATTRE",  internalComment: "Concept intéressant mais trop répétitif visuellement." },
+    { filmId: 7,  userId: jury1.id, score: "JAIME",       internalComment: "Poétique et maîtrisé. Bande son parfaite." },
+    { filmId: 8,  userId: jury1.id, score: "JAIME",       internalComment: "Thriller efficace." },
+    { filmId: 10, userId: jury1.id, score: "JAIME_PAS",   internalComment: "Trop abstrait malgré les belles images." },
+    { filmId: 1,  userId: jury2.id, score: "A_DEBATTRE",  internalComment: "Techniquement impressionnant mais narrativement creux." },
+    { filmId: 2,  userId: jury2.id, score: "JAIME",       internalComment: "Le meilleur film de la sélection selon moi." },
+    { filmId: 6,  userId: jury2.id, score: "JAIME",       internalComment: "L'esthétique pixel art est parfaitement maîtrisée." },
+    { filmId: 9,  userId: jury2.id, score: "JAIME_PAS",   internalComment: "La thématique spiritualité + IA est surexploitée." },
+    { filmId: 11, userId: jury2.id, score: "JAIME",       internalComment: "Atmosphère cyberpunk réussie." },
   ]);
 
   log("13 votes jury créés");
@@ -391,9 +391,11 @@ async function main() {
     { key: "max_duration_seconds", value: "60",                        description: "Durée maximale d'un film en secondes" },
     { key: "max_films_selection",  value: "50",                        description: "Nombre maximum de films en sélection officielle" },
     { key: "festival_date",        value: "2026-06-12T09:00:00.000Z",  description: "Date de début du festival (Marseille)" },
+    { key: "current_phase",        value: "1",                         description: "Phase actuelle du festival (1: soumissions, 2: sélection top 50, 3: événement physique)" },
+    { key: "finalists_public",     value: "false",                     description: "Les finalistes sont-ils visibles publiquement ?" },
   ]);
 
-  log("6 entrées de configuration créées");
+  log("8 entrées de configuration créées");
 
   // ── Résumé ─────────────────────────────────────────────────────────────────
 

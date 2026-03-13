@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { signIn } from "../../api/auth.js";
 import { UserRoundPlus, User, Mail, Eye, EyeOff, Send } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
@@ -8,19 +9,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const registerSchema = z
-  .object({
-    username: z.string().min(1, "L'alias citoyen est requis"),
-    email: z.string().email("Email invalide"),
-    password: z.string().min(6, "Minimum 6 caractères"),
-    confirmPassword: z.string().min(1, "Veuillez confirmer le mot de passe"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Les mots de passe ne correspondent pas",
-    path: ["confirmPassword"],
-  });
-
 export function Register() {
+  const { t } = useTranslation();
+  const p = "auth.pages.register";
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -30,7 +22,7 @@ export function Register() {
       <div className="min-h-screen bg-black text-white flex items-center justify-center px-6">
         <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
           <h1 className="text-xl font-semibold">
-            Vous êtes déjà connecté en tant que{" "}
+            {t(`${p}.alreadyConnected`)}{" "}
             <span className="text-[#51A2FF]">
               {localStorage.getItem("username")}
             </span>
@@ -39,12 +31,24 @@ export function Register() {
             to="/"
             className="mt-4 inline-flex text-sm text-white/70 hover:text-white underline underline-offset-4"
           >
-            Retour à l'accueil
+            {t(`${p}.backHome`)}
           </Link>
         </div>
       </div>
     );
   }
+
+  const registerSchema = z
+    .object({
+      username: z.string().min(1, t(`${p}.usernameRequired`)),
+      email: z.string().email(t(`${p}.emailInvalid`)),
+      password: z.string().min(6, t(`${p}.passwordMin`)),
+      confirmPassword: z.string().min(1, t(`${p}.confirmRequired`)),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t(`${p}.passwordMismatch`),
+      path: ["confirmPassword"],
+    });
 
   const navigate = useNavigate();
 
@@ -58,7 +62,6 @@ export function Register() {
 
   const registerMutation = useMutation({
     mutationFn: async (data) => {
-      // On n'envoie pas confirmPassword au back (souvent inutile côté API)
       const payload = {
         username: data.username,
         email: data.email,
@@ -73,8 +76,8 @@ export function Register() {
       localStorage.setItem("token", response.data?.token);
       navigate("/");
     },
-    onError: (error) => {
-      alert(error.response?.data?.error || "Erreur lors de l'inscription");
+    onError: () => {
+      // L'intercepteur Axios affiche deja le toast automatiquement
     },
   });
 
@@ -84,19 +87,16 @@ export function Register() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* BACKGROUND */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-48 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#51A2FF]/20 blur-[120px]" />
         <div className="absolute -bottom-56 right-[-140px] h-[560px] w-[560px] rounded-full bg-[#9810FA]/10 blur-[140px]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.04),rgba(0,0,0,0)_55%)]" />
       </div>
 
-      {/* CARD */}
       <main className="relative z-10 px-6 py-12">
         <div className="mx-auto max-w-[1400px] flex items-center justify-center">
           <div className="w-full max-w-md">
             <div className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-8 shadow-2xl shadow-black/60 backdrop-blur-xl">
-              {/* TITLE */}
               <div className="flex flex-col items-center text-center gap-3 mb-8">
                 <div className="h-14 w-14 rounded-full bg-white/[0.04] border border-white/[0.12] flex items-center justify-center">
                   <UserRoundPlus className="text-white" size={28} />
@@ -106,30 +106,28 @@ export function Register() {
                   style={{ fontFamily: "Arimo, sans-serif", fontWeight: 700, fontSize: "48px", lineHeight: "48px", letterSpacing: "-2.4px" }}
                   className="bg-gradient-to-r from-[#2B7FFF] to-[#9810FA] bg-clip-text text-transparent"
                 >
-                  INSCRIPTION
+                  {t(`${p}.title`)}
                 </h1>
 
                 <p className="text-[10px] text-white uppercase tracking-[0.22em]">
-                  NOUVEAU PROFIL CYBER-PREMIUM
+                  {t(`${p}.subtitle`)}
                 </p>
               </div>
 
-              {/* FORM */}
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                {/* USERNAME */}
                 <div className="space-y-2">
                   <label
                     htmlFor="username"
                     className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white"
                   >
-                    ALIAS CITOYEN
+                    {t(`${p}.usernameLabel`)}
                   </label>
                   <div className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-black/50 px-4 py-3 focus-within:border-[#51A2FF]/50 transition">
                     <User className="text-white" size={18} />
                     <input
                       id="username"
                       type="text"
-                      placeholder="John Doe"
+                      placeholder={t(`${p}.usernamePlaceholder`)}
                       {...register("username")}
                       className="w-full bg-transparent text-[14px] text-white placeholder:text-white/40 placeholder:font-[Arimo] placeholder:font-normal outline-none border-none shadow-none"
                     />
@@ -141,20 +139,19 @@ export function Register() {
                   )}
                 </div>
 
-                {/* EMAIL */}
                 <div className="space-y-2">
                   <label
                     htmlFor="email"
                     className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white"
                   >
-                    CANAL DE COMMUNICATION
+                    {t(`${p}.emailLabel`)}
                   </label>
                   <div className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-black/50 px-4 py-3 focus-within:border-[#51A2FF]/50 transition">
                     <Mail className="text-white" size={18} />
                     <input
                       id="email"
                       type="email"
-                      placeholder="nom@exemple.com"
+                      placeholder={t(`${p}.emailPlaceholder`)}
                       autoComplete="email"
                       {...register("email")}
                       className="w-full bg-transparent text-[14px] text-white placeholder:text-white/40 placeholder:font-[Arimo] placeholder:font-normal outline-none border-none shadow-none autofill:shadow-[0_0_0_30px_rgba(0,0,0,0.9)_inset] autofill:[-webkit-text-fill-color:white]"
@@ -165,15 +162,13 @@ export function Register() {
                   )}
                 </div>
 
-                {/* PASSWORD + CONFIRM */}
                 <div className="grid grid-cols-2 gap-4">
-                  {/* PASSWORD */}
                   <div className="space-y-2">
                     <label
                       htmlFor="password"
                       className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white"
                     >
-                      CLÉ D'ACCÈS
+                      {t(`${p}.passwordLabel`)}
                     </label>
                     <div className="flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-black/50 px-4 py-3 focus-within:border-[#51A2FF]/50 transition">
                       <input
@@ -199,13 +194,12 @@ export function Register() {
                     )}
                   </div>
 
-                  {/* CONFIRM */}
                   <div className="space-y-2">
                     <label
                       htmlFor="confirmPassword"
                       className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white"
                     >
-                      VÉRIFICATION
+                      {t(`${p}.confirmLabel`)}
                     </label>
                     <div className="flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-black/50 px-4 py-3 focus-within:border-[#51A2FF]/50 transition">
                       <input
@@ -231,7 +225,6 @@ export function Register() {
                   </div>
                 </div>
 
-                {/* CHECKBOX */}
                 <div className="flex items-center gap-3 pt-1">
                   <button
                     type="button"
@@ -247,11 +240,10 @@ export function Register() {
                     />
                   </button>
                   <span className="text-[14px] text-white/70 uppercase tracking-wide font-normal font-[Arimo]">
-                    JE CONSENTS AUX TERMERS ET AU CONDITION GENERAL
+                    {t(`${p}.terms`)}
                   </span>
                 </div>
 
-                {/* BUTTON */}
                 <button
                   type="submit"
                   disabled={registerMutation.isPending}
@@ -259,19 +251,18 @@ export function Register() {
                 >
                   <Send size={16} />
                   {registerMutation.isPending
-                    ? "INSCRIPTION..."
-                    : "GÉNÉRER IDENTITÉ"}
+                    ? t(`${p}.submitting`)
+                    : t(`${p}.submit`)}
                 </button>
 
-                {/* LINK */}
                 <div className="text-center pt-2">
                   <Link
                     to="/auth/login"
                     className="text-xs text-white hover:text-white/80 transition"
                   >
-                    DÉJÀ ENREGISTRÉ ?{"   "}
+                    {t(`${p}.hasAccount`)}{"   "}
                     <span className="font-semibold text-white">
-                      Ouvrir Session
+                      {t(`${p}.login`)}
                     </span>
                   </Link>
                 </div>

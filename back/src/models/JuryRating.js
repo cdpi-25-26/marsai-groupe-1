@@ -5,12 +5,12 @@ import sequelize from "../db/connection.js";
  * Valeurs possibles pour la notation jury (CdC §3.3 — modifié)
  * Remplacement de la note 1-10 par un système en 4 étapes
  */
-const JURY_RATING_VALUES = ["TRES_BIEN", "BIEN", "BOF", "JAIME_PAS"];
+const JURY_RATING_VALUES = ["JAIME", "JAIME_PAS", "A_DEBATTRE"];
 
 /**
  * Notation du Jury (CdC §3.3)
  * - Accès à la liste des 50 films finalistes (SELECTION_OFFICIELLE)
- * - Note en 4 étapes : Très bien / Bien / Bof / J'aime pas
+ * - Vote en 3 critères : J'aime / J'aime pas / À débattre
  * - Commentaires internes (non publics) pour délibération
  * - Possibilité de revenir sur son vote (upsert via service)
  */
@@ -27,11 +27,10 @@ const JuryRating = sequelize.define(
       references: { model: "users", key: "id" },
       onDelete: "CASCADE",
     },
-    // Note qualitative en 4 étapes (remplace l'ancien score 1-10)
     score: {
       type: DataTypes.ENUM(...JURY_RATING_VALUES),
       allowNull: false,
-      comment: "Note qualitative : TRES_BIEN | BIEN | BOF | JAIME_PAS",
+      comment: "Vote : JAIME | JAIME_PAS | A_DEBATTRE",
     },
     internalComment: {
       type: DataTypes.TEXT,

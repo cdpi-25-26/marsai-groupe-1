@@ -95,11 +95,6 @@ export function NotificationDropdown() {
   const notifications = notificationsData?.data || [];
   const unreadCount = unreadCountData?.data?.count || 0;
 
-  // Ne rien afficher si l'utilisateur n'est pas connecté
-  if (!isAuthenticated) {
-    return null;
-  }
-
   useEffect(() => {
     const updateIsMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -112,6 +107,10 @@ export function NotificationDropdown() {
       window.removeEventListener("resize", updateIsMobile);
     };
   }, []);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleMarkAsRead = (notificationId, e) => {
     e.stopPropagation();

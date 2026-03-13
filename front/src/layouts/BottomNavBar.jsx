@@ -9,7 +9,7 @@ export function BottomNavigation() {
   const location = useLocation();
 
   const navItems = [
-    { path: '/', icon: Home, label: t('nav.home') },
+    { path: '/feed', icon: Home, label: t('nav.home') },
     { path: '/discover', icon: Search, label: t('nav.discover') },
     { path: '/soumission', icon: PlusCircle, label: t('nav.submit'), isSpecial: true },
     { path: '/competition', icon: Trophy, label: t('nav.competition') },

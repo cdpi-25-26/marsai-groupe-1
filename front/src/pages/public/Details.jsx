@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { X, Play, Heart, Share2, Bookmark, Eye, Sparkles, Send } from "lucide-react";
-import { filmsData } from "../../data/films-data";
+import { X, Play, Heart, Share2, Bookmark, Eye, Sparkles, Send, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getFilmById } from "../../api/films.js";
+import { mapFilm } from "../../utils/mapFilm.js";
 
 function ImpactStat({ icon: Icon, label, value, color }) {
   return (
@@ -24,14 +26,33 @@ export default function Detail() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const film = filmsData.find((f) => f.id === Number(id));
+  const { data: film, isLoading, isError } = useQuery({
+    queryKey: ["film", id],
+    queryFn: async () => {
+      const res = await getFilmById(id);
+      return mapFilm(res.data);
+    },
+    enabled: !!id,
+  });
 
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [likes, setLikes] = useState(film?.likes ?? 0);
+  const [likes, setLikes] = useState(0);
   const [newComment, setNewComment] = useState("");
 
-  if (!film) {
+  useEffect(() => {
+    if (film) setLikes(film.likes ?? 0);
+  }, [film]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen text-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#51A2FF]" />
+      </div>
+    );
+  }
+
+  if (!film || isError) {
     return (
       <div className="min-h-screen text-white flex items-center justify-center">
         <div className="text-center">

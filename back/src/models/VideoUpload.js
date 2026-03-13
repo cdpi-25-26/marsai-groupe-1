@@ -78,6 +78,31 @@ const VideoUpload = sequelize.define(
       allowNull: true,
       comment: "Raison du rejet (si copyright détecté)",
     },
+    country: {
+      type: DataTypes.STRING(3),
+      allowNull: true,
+      comment: "Pays d'origine du film (ISO 3166)",
+    },
+    category: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      comment: "Catégorie du film",
+    },
+    aiTools: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: "Outils IA utilisés (tableau d'ids)",
+    },
+    synopsis: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: "Synopsis du film",
+    },
+    thumbnailPath: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      comment: "URL S3 de la miniature (thumbnail)",
+    },
   },
   {
     tableName: "video_uploads",

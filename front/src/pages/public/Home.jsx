@@ -17,6 +17,7 @@ import imgRevesSynthetiques from "../../assets/Image/33b7d0b9228d904d0c7a25d5a64
 import imgCodeQuantique from "../../assets/Image/2a36b4071dbaca8c1fe10d67a48e4aba0a375cc8.png";
 import imgEchosDuFutur from "../../assets/Image/f44ef0fc9641fe42c8a8e189a434ce74f4a29955.png";
 
+
 // Partner Logos
 import imgLogo1 from "../../assets/Image/4acb560ae2e727a6a37837ae9574bf6c08a271c8.png";
 import imgLogo2 from "../../assets/Image/83fbf140f57b899c976e236d877758bbb8eda98a.png";

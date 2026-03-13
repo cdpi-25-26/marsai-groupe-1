@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { login } from "../../api/auth.js";
 import { LogIn, User, Lock, Eye, EyeOff, Send } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
@@ -8,12 +9,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const loginSchema = z.object({
-  username: z.string().min(1, "Identifiant requis"),
-  password: z.string().min(1, "Clé requise"),
-});
-
 export function Login() {
+  const { t } = useTranslation();
+  const p = "auth.pages.login";
+
   const [showPassword, setShowPassword] = useState(false);
   const [maintainSession, setMaintainSession] = useState(false);
 
@@ -22,7 +21,7 @@ export function Login() {
       <div className="min-h-screen bg-black text-white flex items-center justify-center px-6">
         <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
           <h1 className="text-xl font-semibold">
-            Vous êtes déjà connecté en tant que{" "}
+            {t(`${p}.alreadyConnected`)}{" "}
             <span className="text-[#51A2FF]">
               {localStorage.getItem("username")}
             </span>
@@ -31,12 +30,17 @@ export function Login() {
             to="/"
             className="mt-4 inline-flex text-sm text-white/70 hover:text-white underline underline-offset-4"
           >
-            Retour à l'accueil
+            {t(`${p}.backHome`)}
           </Link>
         </div>
       </div>
     );
   }
+
+  const loginSchema = z.object({
+    username: z.string().min(1, t(`${p}.usernameRequired`)),
+    password: z.string().min(1, t(`${p}.passwordRequired`)),
+  });
 
   const navigate = useNavigate();
 
@@ -66,8 +70,8 @@ export function Login() {
           break;
       }
     },
-    onError: (error) => {
-      alert(error.response?.data?.error || "Erreur de connexion au serveur");
+    onError: () => {
+      // L'intercepteur Axios affiche deja le toast automatiquement
     },
   });
 
@@ -77,21 +81,16 @@ export function Login() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* BACKGROUND */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-48 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#51A2FF]/20 blur-[120px]" />
         <div className="absolute -bottom-56 right-[-140px] h-[560px] w-[560px] rounded-full bg-[#9810FA]/10 blur-[140px]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.04),rgba(0,0,0,0)_55%)]" />
       </div>
 
-
-
-      {/* CARD */}
       <main className="relative z-10 px-6 py-12">
         <div className="mx-auto max-w-[1400px] flex items-center justify-center">
           <div className="w-full max-w-md">
             <div className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-8 shadow-2xl shadow-black/60 backdrop-blur-xl">
-              {/* TITLE */}
               <div className="flex flex-col items-center text-center gap-3 mb-8">
                 <div className="h-14 w-14 rounded-full bg-white/[0.04] border border-white/[0.12] flex items-center justify-center">
                   <LogIn className="text-white" size={28} />
@@ -101,29 +100,28 @@ export function Login() {
                   style={{ fontFamily: "Arimo, sans-serif", fontWeight: 700, fontSize: "48px", lineHeight: "48px", letterSpacing: "-2.4px" }}
                   className="bg-gradient-to-r from-[#2B7FFF] to-[#9810FA] bg-clip-text text-transparent"
                 >
-                  CONNEXION
+                  {t(`${p}.title`)}
                 </h1>
 
                 <p className="text-[10px] text-white/50 uppercase tracking-[0.22em]">
-                  PROTOCOLE D'ACCÈS MARSAI
+                  {t(`${p}.subtitle`)}
                 </p>
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} autoComplete="off" className="space-y-5">
-                {/* IDENTIFIANT DE SESSION */}
                 <div className="space-y-2">
                   <label
                     htmlFor="username"
                     className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white"
                   >
-                    IDENTIFIANT DE SESSION
+                    {t(`${p}.usernameLabel`)}
                   </label>
                   <div className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-black/50 px-4 py-3 focus-within:border-[#51A2FF]/50 transition">
                     <User className="text-white/50 shrink-0" size={18} />
                     <input
                       id="username"
                       type="text"
-                      placeholder="votre identifiant"
+                      placeholder={t(`${p}.usernamePlaceholder`)}
                       autoComplete="username"
                       {...register("username")}
                       className="w-full bg-transparent text-sm text-white placeholder:text-white/10 placeholder:font-[Arimo] outline-none border-none shadow-none autofill:shadow-[0_0_0_30px_rgba(0,0,0,0.9)_inset] autofill:[-webkit-text-fill-color:white]"
@@ -134,13 +132,12 @@ export function Login() {
                   )}
                 </div>
 
-                {/* CLÉ CRYPTOGRAPHIQUE */}
                 <div className="space-y-2">
                   <label
                     htmlFor="password"
                     className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white"
                   >
-                    CLÉ CRYPTOGRAPHIQUE
+                    {t(`${p}.passwordLabel`)}
                   </label>
                   <div className="flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-black/50 px-4 py-3 focus-within:border-[#51A2FF]/50 transition">
                     <Lock className="text-white/50 shrink-0" size={18} />
@@ -167,7 +164,6 @@ export function Login() {
                   )}
                 </div>
 
-                {/* MAINTENIR SESSION + RESET */}
                 <div className="flex items-center justify-between pt-1">
                   <button
                     type="button"
@@ -182,7 +178,7 @@ export function Login() {
                       } transition`}
                     />
                     <span className="text-[10px] text-white uppercase tracking-wide font-semibold">
-                      MAINTENIR SESSION
+                      {t(`${p}.keepSession`)}
                     </span>
                   </button>
 
@@ -190,11 +186,10 @@ export function Login() {
                     type="button"
                     className="text-[10px] text-[#51A2FF] uppercase tracking-wide font-semibold hover:text-[#9810FA] transition"
                   >
-                    RESET ?
+                    {t(`${p}.reset`)}
                   </button>
                 </div>
 
-                {/* BUTTON */}
                 <button
                   type="submit"
                   disabled={loginMutation.isPending}
@@ -202,20 +197,19 @@ export function Login() {
                 >
                   <Send size={16} />
                   {loginMutation.isPending
-                    ? "CONNEXION..."
-                    : "INITIALISER FLUX"}
+                    ? t(`${p}.submitting`)
+                    : t(`${p}.submit`)}
                 </button>
               </form>
 
-              {/* LINK */}
               <div className="mt-6 text-center">
                 <Link
                   to="/auth/register"
                   className="text-xs text-white hover:text-white/80 transition"
                 >
-                  NOUVEAU VOYAGEUR ?{" "}
+                  {t(`${p}.noAccount`)}{" "}
                   <span className="font-semibold text-white">
-                    Générer Identité
+                    {t(`${p}.signUp`)}
                   </span>
                 </Link>
               </div>

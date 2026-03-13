@@ -74,9 +74,15 @@ export const deleteUser = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
+export const getMe = asyncHandler(async (req, res) => {
+  const user = await UserService.getUserById(req.user.id);
+  res.json(user);
+});
+
 export default {
   getUsers,
   getUserById,
+  getMe,
   createUser,
   updateUser,
   deleteUser,

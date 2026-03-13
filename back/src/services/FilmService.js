@@ -5,6 +5,7 @@
 
 import Film, { FILM_STATUS } from "../models/Film.js";
 import User from "../models/User.js";
+import VideoUpload from "../models/VideoUpload.js";
 import SubmissionConfig from "../models/SubmissionConfig.js";
 import Notification from "../models/Notification.js";
 import { AppError } from "../middlewares/errorHandler.js";
@@ -94,11 +95,22 @@ class FilmService {
 
       const offset = (page - 1) * limit;
 
+      const includes = [];
+      if (includeUser) {
+        includes.push({ model: User, attributes: ["id", "username", "country"] });
+      }
+      includes.push({
+        model: VideoUpload,
+        as: "videoUpload",
+        attributes: ["id", "s3Url", "s3Key", "thumbnailPath", "copyrightStatus"],
+        required: false,
+      });
+
       const { count, rows } = await Film.findAndCountAll({
         where,
         limit: parseInt(limit),
         offset: parseInt(offset),
-        include: includeUser ? [{ model: User, attributes: ["id", "username", "country"] }] : [],
+        include: includes,
         order: [["created_at", "DESC"]],
       });
 

@@ -4,6 +4,15 @@ async function getFilms(params = {}) {
   return await instance.get("films", { params });
 }
 
+/**
+ * Récupère les films approuvés pour le feed TikTok (avec s3Url vidéo)
+ * @param {number} page
+ * @param {number} limit
+ */
+async function getFeedFilms(page = 1, limit = 10) {
+  return await instance.get("films", { params: { status: "APPROVED", page, limit } });
+}
+
 async function getFilmById(id) {
   return await instance.get(`films/${id}`);
 }
@@ -33,10 +42,13 @@ export async function uploadSubtitle(filmId, file, language) {
 /**
  * Upload d'un thumbnail image pour un film
  * POST /api/videos/thumbnail
+ * @param {File} file
+ * @param {number|null} videoUploadId - ID du VideoUpload à lier (optionnel)
  */
-export async function uploadThumbnail(file) {
+export async function uploadThumbnail(file, videoUploadId = null) {
   const formData = new FormData();
   formData.append("thumbnail", file);
+  if (videoUploadId) formData.append("videoUploadId", videoUploadId);
   return instance.post("/videos/thumbnail", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
@@ -49,4 +61,4 @@ export async function uploadThumbnail(file) {
 export const fetchSelectionOfficielle = () =>
   instance.get("/films/selection-officielle");
 
-export { getFilms, getFilmById, getSelectionOfficielle, updateFilmStatus };
+export { getFilms, getFilmById, getSelectionOfficielle, updateFilmStatus, getFeedFilms };

@@ -25,11 +25,13 @@ export const uploadVideo = asyncHandler(async (req, res) => {
 
   const title = req.body.title || req.file.originalname;
   const userId = req.user?.id || null;
+  const { country, category, synopsis } = req.body;
+  const aiTools = req.body.aiTools ? JSON.parse(req.body.aiTools) : null;
 
   // Upload S3 immédiat
   const { s3Url, key } = await VideoService.uploadToS3(req.file);
 
-  // Créer l'enregistrement PENDING
+  // Créer l'enregistrement PENDING avec toutes les métadonnées
   const upload = await VideoUpload.create({
     userId,
     filename: req.file.originalname,
@@ -38,6 +40,10 @@ export const uploadVideo = asyncHandler(async (req, res) => {
     s3Url,
     fileSize: req.file.size,
     copyrightStatus: "PENDING",
+    country:  country  || null,
+    category: category || null,
+    synopsis: synopsis || null,
+    aiTools:  aiTools  || null,
   });
 
   logger.info("Video upload created", { id: upload.id, key });
@@ -81,10 +87,46 @@ async function checkCopyrightAsync(uploadId, fileBuffer, mimeType, filename, tit
     await upload.update({ copyrightStatus: "APPROVED", lastCopyrightCheckAt: new Date() });
     logger.info("Video APPROVED", { uploadId, youtubeVideoId });
 
-    const film = await Film.findOne({ where: { videoUploadId: uploadId } });
+    // Chercher un Film existant lié à cet upload
+    let film = await Film.findOne({ where: { videoUploadId: uploadId } });
     if (film) {
       await film.update({ youtubeId: youtubeVideoId });
       logger.info("Film youtubeId synced", { filmId: film.id, youtubeVideoId });
+    } else if (upload.userId) {
+      // Construire aiIdentity depuis les outils sélectionnés
+      const toolsList = Array.isArray(upload.aiTools) ? upload.aiTools : [];
+      const SCENARIO_TOOLS  = ["chatgpt", "claude", "gemini"];
+      const IMAGE_TOOLS     = ["midjourney", "dalle", "stablediff", "flux"];
+      const VIDEO_TOOLS     = ["sora", "runway", "kling", "pika"];
+      const SOUND_TOOLS     = ["elevenlabs", "suno", "udio"];
+
+      const pick = (ids) => {
+        const matched = toolsList.filter((t) => ids.includes(t));
+        return matched.length ? matched.join(", ") : null;
+      };
+
+      const aiIdentity = {
+        scenario:       pick(SCENARIO_TOOLS),
+        image:          pick(IMAGE_TOOLS),
+        video:          pick(VIDEO_TOOLS),
+        sound:          pick(SOUND_TOOLS),
+        postProduction: null,
+      };
+
+      // Créer le Film directement (bypass FilmService pour éviter les contraintes
+      // sur posterPath et la période de soumission, gérées en amont)
+      film = await Film.create({
+        title:         upload.title || upload.filename,
+        description:   upload.synopsis || null,
+        country:       upload.country  ? upload.country.toUpperCase() : null,
+        youtubeId:     youtubeVideoId,
+        videoUploadId: upload.id,
+        posterPath:    upload.thumbnailPath || null,
+        aiIdentity,
+        userId:        upload.userId,
+        status:        "PENDING",
+      });
+      logger.info("Film auto-créé après approbation copyright", { filmId: film.id, uploadId });
     }
 
     if (upload.userId) {
@@ -201,6 +243,13 @@ export const uploadThumbnail = asyncHandler(async (req, res) => {
   if (!req.file) throw new AppError("Fichier image requis (champ 'thumbnail')", 400);
 
   const { url, key } = await VideoService.uploadThumbnailToS3(req.file);
+
+  // Si un videoUploadId est fourni, lier la thumbnail au VideoUpload
+  const videoUploadId = req.body.videoUploadId ? parseInt(req.body.videoUploadId) : null;
+  if (videoUploadId) {
+    await VideoUpload.update({ thumbnailPath: url }, { where: { id: videoUploadId } });
+    logger.info("Thumbnail linked to VideoUpload", { videoUploadId, url });
+  }
 
   res.status(201).json({
     message: "Thumbnail uploadé avec succès",

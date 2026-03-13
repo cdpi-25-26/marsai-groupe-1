@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "../components/ToastProvider.jsx";
 
 const instance = axios.create({
   baseURL: "http://localhost:3000/api",
@@ -19,17 +20,32 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
+    const status = error.response?.status;
+    const rawMessage =
+      error.response?.data?.error ??
+      error.response?.data?.message ??
+      error.message ??
+      "Erreur inconnue";
 
+    let message;
+    if (typeof rawMessage === "string") {
+      message = rawMessage;
+    } else if (rawMessage && typeof rawMessage === "object") {
+      // Certains endpoints renvoient un objet (statusCode, status, isOperational, ...)
+      message = rawMessage.message || "Erreur serveur";
+    } else {
+      message = "Erreur inconnue";
+    }
+
+    if (status === 401) {
+      localStorage.removeItem("token");
       localStorage.removeItem("username");
       localStorage.removeItem("role");
       localStorage.removeItem("userId");
       if (window.location.pathname !== "/auth/login") {
         window.location.href = "/auth/login";
       }
-    }
-    if (error.response?.status === 403) {
+    } else if (status === 403) {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
       localStorage.removeItem("role");
@@ -38,6 +54,9 @@ instance.interceptors.response.use(
         window.location.href = "/auth/login?reason=forbidden";
       }
     }
+
+    toast(message, "error");
+
     return Promise.reject(error);
   },
 );

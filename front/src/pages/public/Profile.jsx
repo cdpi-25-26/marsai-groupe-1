@@ -7,7 +7,11 @@ import {
   Trophy, Calendar, MapPin, MoreHorizontal,
   Grid3x3, Bookmark, Check,
 } from "lucide-react";
-import { filmsData } from "../../data/films-data";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { getMe } from "../../api/users.js";
+import { getFilms } from "../../api/films.js";
+import { mapFilm } from "../../utils/mapFilm.js";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -15,22 +19,38 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState("films");
   const [isFollowing, setIsFollowing] = useState(false);
 
-  // Données utilisateur simulées (à remplacer par l'API)
-  const userData = {
-    name: "Alex Chen",
-    username: "alexchen",
-    bio: t("pages.profile.bio"),
-    country: t("pages.profile.location"),
-    joinDate: t("pages.profile.since"),
-    avatar: "AC",
-    followers: 12400,
-    following: 342,
-    totalLikes: 45800,
-    totalViews: 287500,
-    verified: true,
-  };
+  const {
+    data: me,
+    isLoading: loadingUser,
+  } = useQuery({
+    queryKey: ["me"],
+    queryFn: async () => {
+      const res = await getMe();
+      return res.data;
+    },
+  });
 
-  const userFilms = filmsData.filter((film) => film.director === userData.name);
+  const {
+    data: allFilms = [],
+    isLoading: loadingFilms,
+  } = useQuery({
+    queryKey: ["my-films"],
+    queryFn: async () => {
+      const res = await getFilms();
+      const raw = res.data?.films || res.data || [];
+      return raw.map((f, i) => mapFilm(f, i));
+    },
+  });
+
+  const userFilms = me
+    ? allFilms.filter(
+        (film) =>
+          film.userId === me.id ||
+          film.directorUsername?.toLowerCase() === `@${me.username}`.toLowerCase()
+      )
+    : [];
+
+  const isLoading = loadingUser || loadingFilms;
 
   const formatNumber = (num) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
@@ -38,11 +58,35 @@ export default function Profile() {
     return num.toString();
   };
 
+  const userData = me && !isLoading
+    ? {
+        name: me.username,
+        username: me.username,
+        bio: t("pages.profile.bio"),
+        country: t("pages.profile.location"),
+        joinDate: t("pages.profile.since"),
+        avatar: (me.username || "U").slice(0, 2).toUpperCase(),
+        followers: 0,
+        following: 0,
+        totalLikes: userFilms.reduce((acc, f) => acc + (f.likes || 0), 0),
+        totalViews: userFilms.reduce((acc, f) => acc + (f.views || 0), 0),
+        verified: me.role === "REALISATEUR" || me.role === "ADMIN",
+      }
+    : null;
+
   const tabs = [
     { id: "films",     label: t("pages.profile.tabs.portfolio"), icon: Grid3x3 },
     { id: "favorites", label: t("pages.profile.tabs.favorites"), icon: Bookmark },
     { id: "about",     label: t("pages.profile.tabs.bio"),       icon: MoreHorizontal },
   ];
+
+  if (isLoading || !userData) {
+    return (
+      <div className="min-h-screen text-foreground flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#51A2FF]" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-foreground pb-32 -mt-[88px] md:-mt-[120px]">

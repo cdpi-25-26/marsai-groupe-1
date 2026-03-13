@@ -11,12 +11,10 @@ import {
   submitRating as apiSubmitRating,
 } from "../../api/juryRating";
 
-// Options de notation (4 étapes)
 const ratingOptions = [
-  { value: "TRES_BIEN", emoji: "❤️", label: "Très bien",  color: "from-pink-500 to-red-500" },
-  { value: "BIEN",      emoji: "🙂", label: "Bien",       color: "from-blue-500 to-cyan-500" },
-  { value: "BOF",       emoji: "😐", label: "Bof",        color: "from-gray-500 to-gray-600" },
-  { value: "JAIME_PAS", emoji: "😕", label: "J'aime pas", color: "from-orange-500 to-red-600" },
+  { value: "JAIME",      emoji: "👍", label: "J'aime",      color: "from-emerald-500 to-green-600" },
+  { value: "JAIME_PAS",  emoji: "👎", label: "J'aime pas",  color: "from-red-500 to-rose-600" },
+  { value: "A_DEBATTRE", emoji: "💬", label: "À débattre",  color: "from-amber-500 to-orange-500" },
 ];
 
 const formatDuration = (seconds) => {

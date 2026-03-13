@@ -2,8 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { Search, Heart, Eye, Play, Trophy, Grid3x3, LayoutList, MessageCircle } from "lucide-react";
-import { filmsData, categories } from "../../data/films-data";
+import { Search, Heart, Eye, Play, Trophy, Grid3x3, LayoutList, MessageCircle, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getFilms } from "../../api/films.js";
+import { mapFilm } from "../../utils/mapFilm.js";
+
+const categories = [
+  "Tous", "Sci-Fi", "Art Numérique", "Animation", "Expérimental",
+  "Romance", "Drame", "Comédie", "Thriller", "Philosophique", "Documentaire",
+];
 
 const categoryToKey = {
   "Tous": "all",
@@ -25,6 +32,15 @@ export default function Discover() {
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("grid");
+
+  const { data: filmsData = [], isLoading } = useQuery({
+    queryKey: ["films-discover"],
+    queryFn: async () => {
+      const res = await getFilms();
+      const raw = res.data?.films || res.data || [];
+      return raw.map((f, i) => mapFilm(f, i));
+    },
+  });
 
   const filteredFilms = filmsData.filter(film => {
     const matchesCategory = selectedCategory === "Tous" || film.category === selectedCategory;
@@ -71,6 +87,14 @@ export default function Discover() {
     };
     return colors[category] || "text-[#51A2FF]";
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen text-foreground flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#51A2FF]" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-foreground pb-10 pt-8">

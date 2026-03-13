@@ -23,7 +23,10 @@ async function deleteUser(id) {
 
 async function getUserById(id) {
   return await instance.get(`users/${id}`);
-  // http://localhost:3000/users/1; fetch method GET
 }
 
-export { getUsers, createUser, updateUser, deleteUser, getUserById };
+async function getMe() {
+  return await instance.get("users/me");
+}
+
+export { getUsers, createUser, updateUser, deleteUser, getUserById, getMe };

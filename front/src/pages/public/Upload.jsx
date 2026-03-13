@@ -179,9 +179,10 @@ export default function UploadPage() {
       }
 
       const filmId = uploadData.filmId;
+      const videoUploadId = uploadData.id;
 
       if (token && thumbnail) {
-        try { await uploadThumbnail(thumbnail); } catch { /* silencieux */ }
+        try { await uploadThumbnail(thumbnail, videoUploadId); } catch { /* silencieux */ }
       }
 
       if (token && filmId && subtitles.length > 0) {

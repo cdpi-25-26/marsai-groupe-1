@@ -15,13 +15,15 @@ import {
 const userRouter = express.Router();
 
 /**
- * @bref Toutes les routes nécessitent l'authentification Admin
+ * @bref Route profil utilisateur connecte (tous les roles)
+ */
+userRouter.get("/me", requireAuth(), UserController.getMe);
+
+/**
+ * @bref Toutes les routes suivantes necessitent l'authentification Admin
  */
 userRouter.use(requireAuth(["ADMIN"]));
 
-/**
- * @bref Routes
- */
 userRouter.get("/", UserController.getUsers);
 userRouter.get("/:id", UserController.getUserById);
 userRouter.post(
