@@ -13,6 +13,7 @@ import Event from "./Event.js";
 import EventRegistration from "./EventRegistration.js";
 import Notification from "./Notification.js";
 import SubmissionConfig from "./SubmissionConfig.js";
+import JuryAttribution from "./JuryAttribution.js";
 
 /**
  * @bref Associations
@@ -31,6 +32,12 @@ User.hasMany(JuryRating, { foreignKey: "userId" });
 JuryRating.belongsTo(User, { foreignKey: "userId" });
 Film.hasMany(JuryRating, { foreignKey: "filmId" });
 JuryRating.belongsTo(Film, { foreignKey: "filmId" });
+
+/* User <-> JuryAttribution <-> Film (attribution admin) */
+User.hasMany(JuryAttribution, { foreignKey: "userId" });
+JuryAttribution.belongsTo(User, { foreignKey: "userId" });
+Film.hasMany(JuryAttribution, { foreignKey: "filmId" });
+JuryAttribution.belongsTo(Film, { foreignKey: "filmId" });
 
 /**
  * @bref Newsletter (optionnel : lié à User ou email seul)
@@ -76,6 +83,7 @@ export {
   Film,
   VideoUpload,
   JuryRating,
+  JuryAttribution,
   NewsletterSubscriber,
   Event,
   EventRegistration,
@@ -89,6 +97,7 @@ export default {
   Film,
   VideoUpload,
   JuryRating,
+  JuryAttribution,
   NewsletterSubscriber,
   Event,
   EventRegistration,

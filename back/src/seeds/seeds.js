@@ -17,6 +17,7 @@ import {
   User,
   Film,
   JuryRating,
+  JuryAttribution,
   Event,
   EventRegistration,
   NewsletterSubscriber,
@@ -37,8 +38,10 @@ async function main() {
   await sequelize.authenticate();
   log("Connexion DB OK");
 
-  // Recréer toutes les tables proprement
+  // Désactiver les FK checks pour permettre le DROP sans contraintes
+  await sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
   await sequelize.sync({ force: true });
+  await sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
   log("Tables recréées");
 
   // ── 1. UTILISATEURS ──────────────────────────────────────────────────────────
@@ -404,6 +407,29 @@ async function main() {
 
   log("13 votes jury créés");
 
+  // ── 3b. ATTRIBUTIONS JURY ─────────────────────────────────────────────────────
+
+  log("Création des attributions jury...");
+
+  // Round-robin : films 1-13 distribués entre jury_sophie et jury_marc
+  await JuryAttribution.bulkCreate([
+    { filmId: 1,  userId: jury1.id, mode: "AUTO" },
+    { filmId: 2,  userId: jury2.id, mode: "AUTO" },
+    { filmId: 3,  userId: jury1.id, mode: "AUTO" },
+    { filmId: 4,  userId: jury2.id, mode: "AUTO" },
+    { filmId: 5,  userId: jury1.id, mode: "AUTO" },
+    { filmId: 6,  userId: jury2.id, mode: "AUTO" },
+    { filmId: 7,  userId: jury1.id, mode: "AUTO" },
+    { filmId: 8,  userId: jury2.id, mode: "AUTO" },
+    { filmId: 9,  userId: jury1.id, mode: "AUTO" },
+    { filmId: 10, userId: jury2.id, mode: "AUTO" },
+    { filmId: 11, userId: jury1.id, mode: "AUTO" },
+    { filmId: 12, userId: jury2.id, mode: "AUTO" },
+    { filmId: 13, userId: jury1.id, mode: "AUTO" },
+  ]);
+
+  log("13 attributions jury créées (round-robin AUTO)");
+
   // ── 4. ÉVÉNEMENTS ────────────────────────────────────────────────────────────
 
   log("Création des événements...");
@@ -562,6 +588,7 @@ async function main() {
   console.log("  🎬  Films  : 13 sélection officielle");
   console.log("               3 en attente · 2 approuvés · 2 refusés");
   console.log("  🗳   Votes  : 13 (jury_sophie: 8, jury_marc: 5)");
+  console.log("  📋  Attrib : 13 (jury_sophie: 7, jury_marc: 6, mode AUTO)");
   console.log("  📅  Events : 5 (festival 12-13 juin Marseille)");
   console.log("  📧  Newsletter : 8 abonnés");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");

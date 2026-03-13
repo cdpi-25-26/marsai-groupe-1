@@ -91,11 +91,10 @@ class EventService {
         title,
         type,
         description,
-        date,
-        startTime,
-        endTime,
+        startDate,
+        endDate,
         location,
-        capacity,
+        maxParticipants,
         status,
       } = eventData;
 
@@ -103,11 +102,10 @@ class EventService {
         title,
         type,
         description: description || null,
-        date,
-        startTime,
-        endTime,
+        startDate,
+        endDate: endDate || null,
         location: location || null,
-        capacity: capacity || 0,
+        maxParticipants: maxParticipants || null,
         status: status || "upcoming",
       });
 
@@ -148,11 +146,10 @@ class EventService {
         title,
         type,
         description,
-        date,
-        startTime,
-        endTime,
+        startDate,
+        endDate,
         location,
-        capacity,
+        maxParticipants,
         status,
       } = eventData;
 
@@ -161,11 +158,10 @@ class EventService {
       if (title != null) event.title = title;
       if (type != null) event.type = type;
       if (description != null) event.description = description;
-      if (date != null) event.date = date;
-      if (startTime != null) event.startTime = startTime;
-      if (endTime != null) event.endTime = endTime;
+      if (startDate != null) event.startDate = startDate;
+      if (endDate != null) event.endDate = endDate;
       if (location != null) event.location = location;
-      if (capacity != null) event.capacity = capacity;
+      if (maxParticipants != null) event.maxParticipants = maxParticipants;
       if (status != null) event.status = status;
 
       await event.save();

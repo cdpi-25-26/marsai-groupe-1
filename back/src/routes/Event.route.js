@@ -21,7 +21,7 @@ eventRouter.get("/", EventController.getEvents);
 eventRouter.get("/:id", EventController.getEventById);
 eventRouter.post(
   "/",
-  validateRequired(["title", "type", "date", "startTime", "endTime"]),
+  validateRequired(["title", "type", "startDate"]),
   EventController.createEvent
 );
 eventRouter.put("/:id", EventController.updateEvent);

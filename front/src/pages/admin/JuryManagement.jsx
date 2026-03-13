@@ -11,13 +11,13 @@ import {
   ChevronLeft,
   Loader2,
   XCircle,
+  CheckCircle,
 } from "lucide-react";
 import { getUsers } from "../../api/users.js";
+import api from "../../api/config";
 
 export default function JuryManagement() {
   const navigate = useNavigate();
-  const [isDistributing, setIsDistributing] = useState(false);
-
   const {
     data: usersData,
     isPending,
@@ -47,12 +47,20 @@ export default function JuryManagement() {
         )
       : 0;
 
-  const handleAutoDistribute = () => {
-    setIsDistributing(true);
-    console.log("Distribution automatique lancée");
-    setTimeout(() => {
-      setIsDistributing(false);
-    }, 2000);
+  const [autoRunning, setAutoRunning] = useState(false);
+  const [autoResult, setAutoResult] = useState(null);
+
+  const handleAutoDistribute = async () => {
+    setAutoRunning(true);
+    setAutoResult(null);
+    try {
+      const r = await api.post("/admin/attributions/auto");
+      setAutoResult({ ok: true, msg: r.data.message });
+    } catch (e) {
+      setAutoResult({ ok: false, msg: e.response?.data?.message ?? "Erreur serveur" });
+    } finally {
+      setAutoRunning(false);
+    }
   };
 
   function getMemberStatus(member) {
@@ -241,26 +249,22 @@ export default function JuryManagement() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={handleAutoDistribute}
-                      disabled={isDistributing}
-                      className="bg-gradient-to-r from-[#51A2FF] to-purple-600 text-white font-black uppercase tracking-widest text-xs py-4 px-8 rounded-2xl hover:shadow-2xl hover:shadow-[#51A2FF]/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      disabled={autoRunning}
+                      className="bg-gradient-to-r from-[#51A2FF] to-purple-600 text-white font-black uppercase tracking-widest text-xs py-4 px-8 rounded-2xl hover:shadow-2xl hover:shadow-[#51A2FF]/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      {isDistributing ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Attribution en cours...
-                        </>
-                      ) : (
-                        <>
-                          <Zap className="w-5 h-5" />
-                          Lancer l'attribution
-                        </>
-                      )}
+                      {autoRunning ? <><Loader2 className="w-4 h-4 animate-spin" />Attribution...</> : <><Zap className="w-5 h-5" />Lancer l'attribution</>}
                     </button>
 
-                    <button className="bg-white/[0.05] border border-white/20 text-white/80 font-black uppercase tracking-widest text-xs py-4 px-8 rounded-2xl hover:bg-white/10 hover:border-white/30 transition-all">
+                    <button onClick={() => navigate("/admin/attribution")} className="bg-white/[0.05] border border-white/20 text-white/80 font-black uppercase tracking-widest text-xs py-4 px-8 rounded-2xl hover:bg-white/10 hover:border-white/30 transition-all">
                       Mode Manuel
                     </button>
                   </div>
+                  {autoResult && (
+                    <div className={`mt-3 flex items-center gap-2 text-sm font-medium ${autoResult.ok ? "text-emerald-400" : "text-red-400"}`}>
+                      {autoResult.ok ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                      {autoResult.msg}
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>

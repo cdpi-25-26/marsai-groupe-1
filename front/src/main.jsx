@@ -15,6 +15,7 @@ import Moderation from "./pages/admin/Moderation.jsx";
 import Leaderboard from "./pages/admin/Leaderboard.jsx";
 import Events from "./pages/admin/Events.jsx";
 import JuryManagement from "./pages/admin/JuryManagement.jsx";
+import AttributionPanel from "./pages/admin/AttributionPanel.jsx";
 import Settings from "./pages/admin/Settings.jsx";
 import CMS from "./pages/admin/CMS.jsx";
 import EditEvent from "./pages/admin/EditEvent.jsx";
@@ -80,6 +81,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="events/new" element={<EditEvent />} />
               <Route path="events/:id/edit" element={<EditEvent />} />
               <Route path="jury" element={<JuryManagement />} />
+              <Route path="attribution" element={<AttributionPanel />} />
               <Route path="settings" element={<Settings />} />
               <Route path="cms" element={<CMS />} />
             </Route>
