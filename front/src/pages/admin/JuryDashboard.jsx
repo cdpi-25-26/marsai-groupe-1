@@ -1,12 +1,14 @@
 import { useState, useMemo } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Search, Filter, CheckCircle, Clock, Play, TrendingUp, BarChart3 } from "lucide-react";
 import {filmsData} from "./jury-data";
+import AppleVideoPlayer from "../../components/AppleVideoPlayer.jsx";
 
 export default function JuryDashboard({ onNavigate }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('title');
+  const [playerFilm, setPlayerFilm] = useState(null);
 
   // Simuler les films avec statut d'évaluation (à remplacer par vraies données)
   const finalistsFilms = filmsData.filter(f => f.rank && f.rank <= 50).map(film => ({
@@ -182,7 +184,7 @@ export default function JuryDashboard({ onNavigate }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03 }}
-              onClick={() => onNavigate && onNavigate('jury-vote', film)}
+              onClick={() => setPlayerFilm(film)}
               className="group cursor-pointer"
             >
               <div className="relative bg-white/[0.02] border border-white/5 rounded-3xl overflow-hidden hover:bg-white/[0.05] hover:border-white/20 transition-all">
@@ -269,6 +271,17 @@ export default function JuryDashboard({ onNavigate }) {
             </motion.div>
           ))}
         </div>
+
+        {/* Apple Video Player modal */}
+        <AnimatePresence>
+          {playerFilm && (
+            <AppleVideoPlayer
+              videoUrl={playerFilm.videoUrl}
+              title={playerFilm.title}
+              onClose={() => setPlayerFilm(null)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Empty State */}
         {filteredFilms.length === 0 && (

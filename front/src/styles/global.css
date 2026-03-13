@@ -21,3 +21,73 @@ button {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* ─── Apple Video Player — range inputs ──────────────────────────── */
+.apple-seek-range,
+.apple-vol-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  border-radius: 999px;
+  outline: none;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.9) var(--fill, 0%),
+    rgba(255, 255, 255, 0.22) var(--fill, 0%)
+  );
+  transition: height 0.15s ease;
+}
+
+.apple-seek-range:hover,
+.apple-seek-range:active {
+  height: 5px;
+}
+
+.apple-vol-range {
+  height: 3px;
+}
+
+/* Thumb — WebKit */
+.apple-seek-range::-webkit-slider-thumb,
+.apple-vol-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  transition: transform 0.1s ease, width 0.15s ease, height 0.15s ease;
+}
+
+.apple-seek-range::-webkit-slider-thumb:active {
+  transform: scale(1.25);
+}
+
+/* Thumb — Firefox */
+.apple-seek-range::-moz-range-thumb,
+.apple-vol-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Track — Firefox */
+.apple-seek-range::-moz-range-track,
+.apple-vol-range::-moz-range-track {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.apple-seek-range::-moz-range-progress,
+.apple-vol-range::-moz-range-progress {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+}
