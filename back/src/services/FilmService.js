@@ -76,6 +76,7 @@ class FilmService {
       const {
         status,
         country,
+        userId,
         page = 1,
         limit = 20,
         includeUser = false,
@@ -84,6 +85,7 @@ class FilmService {
       const where = {};
       if (status) where.status = status;
       if (country) where.country = country.toUpperCase();
+      if (userId) where.userId = userId;
 
       const offset = (page - 1) * limit;
 

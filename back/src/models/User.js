@@ -41,6 +41,12 @@ const User = sequelize.define(
       allowNull: true,
       comment: "Code ISO 3166-1 alpha-2 (ex: FR)",
     },
+    // Photo de profil (URL S3)
+    profilePicture: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      comment: "URL Scaleway S3 de la photo de profil",
+    },
     // Liens réseaux sociaux optionnels
     socialLinks: {
       type: DataTypes.JSON,

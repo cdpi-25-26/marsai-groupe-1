@@ -26,4 +26,18 @@ async function getUserById(id) {
   // http://localhost:3000/users/1; fetch method GET
 }
 
-export { getUsers, createUser, updateUser, deleteUser, getUserById };
+async function getMyProfile() {
+  return await instance.get("auth/me");
+}
+
+async function updateMyProfile(data) {
+  return await instance.patch("auth/me", data);
+}
+
+async function uploadProfilePicture(file) {
+  const formData = new FormData();
+  formData.append("avatar", file);
+  return await instance.post("auth/me/avatar", formData);
+}
+
+export { getUsers, createUser, updateUser, deleteUser, getUserById, getMyProfile, updateMyProfile, uploadProfilePicture };

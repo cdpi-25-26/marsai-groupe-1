@@ -228,6 +228,27 @@ async function deleteSubtitleFromS3(key) {
   logger.info("S3 subtitle delete success", { key });
 }
 
+/**
+ * @brief Upload une photo de profil vers Scaleway S3
+ * @param {Express.Multer.File} file - Fichier image (jpg, png, webp, gif)
+ * @returns {Promise<{s3Url: string, key: string}>}
+ */
+async function uploadAvatarToS3(file) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  const uniqueKey = `${FOLDER}/avatars/${crypto.randomUUID()}${ext}`;
+
+  await s3Client.send(new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: uniqueKey,
+    Body: file.buffer,
+    ContentType: file.mimetype,
+  }));
+
+  const s3Url = `${process.env.SCW_ENDPOINT}/${BUCKET_NAME}/${uniqueKey}`;
+  logger.info("S3 avatar upload success", { key: uniqueKey });
+  return { s3Url, key: uniqueKey };
+}
+
 export default {
   uploadToYoutube,
   checkYoutubeCopyright,
@@ -238,4 +259,5 @@ export default {
   computeFileHash,
   uploadSubtitleToS3,
   deleteSubtitleFromS3,
+  uploadAvatarToS3,
 };
