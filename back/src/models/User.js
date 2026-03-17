@@ -43,10 +43,17 @@ const User = sequelize.define(
     },
     // Liens réseaux sociaux optionnels
     socialLinks: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: true,
-      defaultValue: {},
+      defaultValue: "{}",
       comment: "Ex: { website, twitter, instagram, linkedin }",
+      get() {
+        const val = this.getDataValue("socialLinks");
+        return val ? JSON.parse(val) : {};
+      },
+      set(val) {
+        this.setDataValue("socialLinks", JSON.stringify(val));
+      },
     },
     // Inscription newsletter (Public - CdC §3.2)
     newsletter: {

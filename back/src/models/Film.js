@@ -79,9 +79,16 @@ const Film = sequelize.define(
     },
     // Fiche d'identité IA (CdC §4.2)
     aiIdentity: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: false,
-      defaultValue: defaultAiIdentity,
+      defaultValue: JSON.stringify(defaultAiIdentity),
+      get() {
+        const val = this.getDataValue("aiIdentity");
+        return val ? JSON.parse(val) : defaultAiIdentity;
+      },
+      set(val) {
+        this.setDataValue("aiIdentity", JSON.stringify(val));
+      },
     },
     // Réalisateur (User REALISATEUR)
     userId: {

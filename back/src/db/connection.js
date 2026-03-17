@@ -15,6 +15,9 @@ const sequelize = new Sequelize(
     port: Number(process.env.DB_PORT) || 3306,
     dialect: process.env.DB_DIALECT,
     logging: false,
+    dialectOptions: {
+      allowPublicKeyRetrieval: true,
+    },
     pool: {
       max: 10,
       min: 0,

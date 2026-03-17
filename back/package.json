@@ -18,6 +18,7 @@
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.992.0",
+    "@sequelize/mariadb": "^7.0.0-alpha.48",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
