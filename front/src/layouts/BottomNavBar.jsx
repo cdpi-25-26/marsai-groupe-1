@@ -1,20 +1,37 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Home, Search, Trophy, User, PlusCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
+import instance from "../api/config.js";
 
 export function BottomNavigation() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const [currentPhase, setCurrentPhase] = useState("1");
 
-  const navItems = [
+  useEffect(() => {
+    instance.get("/config/public").then(({ data }) => {
+      setCurrentPhase(data.current_phase || "1");
+    }).catch(() => {});
+  }, []);
+
+  const baseItems = [
     { path: '/feed', icon: Home, label: t('nav.home') },
     { path: '/discover', icon: Search, label: t('nav.discover') },
-    { path: '/soumission', icon: PlusCircle, label: t('nav.submit'), isSpecial: true },
-    { path: '/competition', icon: Trophy, label: t('nav.competition') },
-    { path: '/profile', icon: User, label: t('nav.profile') }
   ];
+
+  if (currentPhase === "1") {
+    baseItems.push({ path: '/soumission', icon: PlusCircle, label: t('nav.submit'), isSpecial: true });
+  }
+
+  baseItems.push(
+    { path: '/competition', icon: Trophy, label: t('nav.competition') },
+    { path: '/profile', icon: User, label: t('nav.profile') },
+  );
+
+  const navItems = baseItems;
 
   const handleNav = (path) => {
     navigate(path);

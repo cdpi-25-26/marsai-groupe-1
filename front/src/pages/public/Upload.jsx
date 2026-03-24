@@ -1,10 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Upload, CheckCircle, XCircle, Film, Loader2, Sparkles,
-  ChevronLeft, FileText, X, Plus, ImageIcon, Bot,
+  ChevronLeft, FileText, X, Plus, ImageIcon, Bot, Lock,
 } from "lucide-react";
 import { uploadSubtitle, uploadThumbnail } from "../../api/films.js";
+import instance from "../../api/config.js";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -85,7 +87,9 @@ const inputCls =
   "w-full px-5 py-4 rounded-2xl bg-white/[0.05] border border-white/[0.10] text-white placeholder-white/25 text-sm font-medium outline-none focus:border-violet-400/50 focus:bg-white/[0.07] transition-all";
 
 export default function UploadPage() {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
+  const [currentPhase, setCurrentPhase] = useState(null);
 
   // Step 1
   const [title, setTitle]       = useState("");
@@ -93,6 +97,7 @@ export default function UploadPage() {
   const [country, setCountry]   = useState("");
   const [duration, setDuration] = useState("");
   const [synopsis, setSynopsis] = useState("");
+  const [aiType, setAiType]     = useState("100_AI");
   const [aiTools, setAiTools]   = useState([]);
 
   // Step 2 — vidéo
@@ -114,6 +119,60 @@ export default function UploadPage() {
   const [status, setStatus] = useState("idle");
   const [result, setResult] = useState(null);
   const [error, setError]   = useState("");
+
+  useEffect(() => {
+    instance.get("/config/public").then(({ data }) => {
+      setCurrentPhase(data.current_phase || "1");
+    }).catch(() => setCurrentPhase("1"));
+  }, []);
+
+  if (currentPhase === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (currentPhase !== "1") {
+    return (
+      <div className="min-h-screen text-foreground pb-32">
+        <div className="relative pt-16 pb-16 px-6" style={{ overflow: "hidden" }}>
+          <div className="absolute top-0 left-1/4 w-72 h-72 md:w-[500px] md:h-[500px] bg-purple-500/15 rounded-full blur-[80px] md:blur-[120px] pointer-events-none" />
+          <div className="max-w-2xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-red-500/10 border border-red-500/30 mb-8"
+            >
+              <Lock className="w-8 h-8 text-red-400" />
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-4xl sm:text-5xl font-black mb-4 tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40"
+            >
+              {t("lang.fr") === "FR" ? "Soumissions fermées" : "Submissions closed"}
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-white/50 text-lg max-w-lg mx-auto"
+            >
+              {currentPhase === "2"
+                ? (t("lang.fr") === "FR"
+                  ? "Les soumissions sont terminées. Le jury est en train de voter sur la sélection officielle. Rendez-vous sur la page Compétition pour voir le Top 50 !"
+                  : "Submissions are closed. The jury is voting on the official selection. Check the Competition page to see the Top 50!")
+                : (t("lang.fr") === "FR"
+                  ? "Le festival est terminé ! Découvrez les vainqueurs sur la page Compétition."
+                  : "The festival is over! Discover the winners on the Competition page.")}
+            </motion.p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const toggleAiTool = (id) =>
     setAiTools((prev) =>
@@ -158,6 +217,7 @@ export default function UploadPage() {
     if (country)  formData.append("country", country);
     if (duration) formData.append("duration", duration);
     if (synopsis) formData.append("synopsis", synopsis);
+    formData.append("aiType", aiType);
     if (aiTools.length) formData.append("aiTools", JSON.stringify(aiTools));
 
     try {
@@ -203,7 +263,7 @@ export default function UploadPage() {
 
   const reset = () => {
     setStep(1); setTitle(""); setCategory(""); setCountry("");
-    setDuration(""); setSynopsis(""); setAiTools([]);
+    setDuration(""); setSynopsis(""); setAiType("100_AI"); setAiTools([]);
     setFile(null); setThumbnail(null); setThumbnailPreview(null);
     setSubtitles([]); setSelectedLang("fr");
     setStatus("idle"); setResult(null); setError("");
@@ -223,10 +283,10 @@ export default function UploadPage() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            SOUMISSION
+            {t("pages.upload.title")}
           </h1>
           <p className="text-white/40 text-[11px] font-bold uppercase tracking-[0.22em] mt-2">
-            Étape {step} sur 3 &nbsp;·&nbsp; Marsai 2026
+            {t("pages.upload.stepOf", { step })} &nbsp;·&nbsp; {t("pages.upload.marsai")}
           </p>
         </div>
 
@@ -256,31 +316,31 @@ export default function UploadPage() {
             <div className="rounded-3xl p-5 space-y-4"
               style={{ background: "linear-gradient(135deg,rgba(167,139,250,0.06),rgba(96,165,250,0.04))", border: "1px solid rgba(167,139,250,0.12)" }}
             >
-              <SectionLabel>Identité de l'œuvre</SectionLabel>
+              <SectionLabel>{t("pages.upload.workIdentity")}</SectionLabel>
 
               <div>
-                <FieldLabel>Titre du film</FieldLabel>
+                <FieldLabel>{t("pages.upload.filmTitle")}</FieldLabel>
                 <input type="text" value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ex : NEURAL ODYSSEY"
+                  placeholder={t("pages.upload.filmTitlePlaceholder")}
                   className={inputCls}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <FieldLabel>Catégorie</FieldLabel>
+                  <FieldLabel>{t("pages.upload.category")}</FieldLabel>
                   <select value={category} onChange={(e) => setCategory(e.target.value)}
                     className={inputCls + " appearance-none cursor-pointer"}
                   >
-                    <option value="" disabled className="bg-[#0d0d1a]">Sélectionner…</option>
+                    <option value="" disabled className="bg-[#0d0d1a]">{t("pages.upload.selectCategory")}</option>
                     {CATEGORIES.map((c) => (
                       <option key={c} value={c} className="bg-[#0d0d1a]">{c}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <FieldLabel>Pays d'origine</FieldLabel>
+                  <FieldLabel>{t("pages.upload.originCountry")}</FieldLabel>
                   <input type="text" value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     placeholder="FRANCE 🇫🇷"
@@ -294,22 +354,22 @@ export default function UploadPage() {
             <div className="rounded-3xl p-5 space-y-4"
               style={{ background: "linear-gradient(135deg,rgba(96,165,250,0.06),rgba(52,211,153,0.04))", border: "1px solid rgba(96,165,250,0.12)" }}
             >
-              <SectionLabel>Détails techniques</SectionLabel>
+              <SectionLabel>{t("pages.upload.technicalDetails")}</SectionLabel>
 
               <div>
-                <FieldLabel>Durée estimée</FieldLabel>
+                <FieldLabel>{t("pages.upload.estimatedDuration")}</FieldLabel>
                 <input type="text" value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  placeholder="Ex: 01:45"
+                  placeholder={t("pages.upload.durationPlaceholder")}
                   className={inputCls}
                 />
               </div>
 
               <div>
-                <FieldLabel>Synopsis</FieldLabel>
+                <FieldLabel>{t("pages.upload.synopsis")}</FieldLabel>
                 <textarea value={synopsis}
                   onChange={(e) => setSynopsis(e.target.value)}
-                  placeholder="Racontez votre histoire…"
+                  placeholder={t("pages.upload.synopsisPlaceholder")}
                   rows={5}
                   className={inputCls + " rounded-2xl resize-none"}
                 />
@@ -322,11 +382,36 @@ export default function UploadPage() {
             >
               <div className="flex items-center gap-2">
                 <Bot className="w-4 h-4 text-amber-400" />
-                <SectionLabel>IA utilisée pour générer</SectionLabel>
+                <SectionLabel>{t("pages.upload.aiCreationType")}</SectionLabel>
+              </div>
+
+              <div className="flex gap-3 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setAiType("100_AI")}
+                  className={`flex-1 py-3 rounded-2xl text-xs font-black uppercase tracking-wider border transition-all ${
+                    aiType === "100_AI"
+                      ? "bg-gradient-to-r from-violet-500/30 to-purple-500/30 border-violet-400/60 text-violet-200 shadow-lg"
+                      : "bg-white/[0.03] border-white/10 text-white/40 hover:border-white/20"
+                  }`}
+                >
+                  {t("pages.upload.fullAi")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAiType("HYBRID")}
+                  className={`flex-1 py-3 rounded-2xl text-xs font-black uppercase tracking-wider border transition-all ${
+                    aiType === "HYBRID"
+                      ? "bg-gradient-to-r from-blue-500/30 to-cyan-500/30 border-blue-400/60 text-blue-200 shadow-lg"
+                      : "bg-white/[0.03] border-white/10 text-white/40 hover:border-white/20"
+                  }`}
+                >
+                  {t("pages.upload.hybrid")}
+                </button>
               </div>
 
               <p className="text-white/35 text-xs -mt-2">
-                Sélectionne les outils IA impliqués dans la création de ton film.
+                {t("pages.upload.selectAiTools")}
               </p>
 
               <div className="flex flex-wrap gap-2">
@@ -351,7 +436,7 @@ export default function UploadPage() {
 
               {aiTools.length > 0 && (
                 <p className="text-white/40 text-xs">
-                  {aiTools.length} outil{aiTools.length > 1 ? "s" : ""} sélectionné{aiTools.length > 1 ? "s" : ""}
+                  {t("pages.upload.toolsSelected", { count: aiTools.length })}
                 </p>
               )}
             </div>
@@ -362,7 +447,7 @@ export default function UploadPage() {
               className="w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               style={{ background: "linear-gradient(135deg,#7c3aed,#2563eb)", boxShadow: title ? "0 0 30px rgba(124,58,237,0.35)" : "none" }}
             >
-              Étape suivante →
+              {t("pages.upload.nextStep")}
             </button>
           </motion.div>
         )}
@@ -379,7 +464,7 @@ export default function UploadPage() {
             <div className="rounded-3xl p-5 space-y-4"
               style={{ background: "linear-gradient(135deg,rgba(96,165,250,0.06),rgba(167,139,250,0.04))", border: "1px solid rgba(96,165,250,0.12)" }}
             >
-              <SectionLabel>Fichier vidéo</SectionLabel>
+              <SectionLabel>{t("pages.upload.videoFile")}</SectionLabel>
 
               <div
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -418,8 +503,8 @@ export default function UploadPage() {
                     >
                       <Upload className="w-7 h-7 text-white/25" />
                     </div>
-                    <p className="text-white/55 text-sm font-bold uppercase tracking-wider">Glisser une vidéo ici</p>
-                    <p className="text-white/25 text-xs">mp4 · mov · avi · webm — max 500 Mo</p>
+                    <p className="text-white/55 text-sm font-bold uppercase tracking-wider">{t("pages.upload.dragVideo")}</p>
+                    <p className="text-white/25 text-xs">{t("pages.upload.videoFormats")}</p>
                   </>
                 )}
               </div>
@@ -429,7 +514,7 @@ export default function UploadPage() {
             <div className="rounded-3xl p-5 space-y-3"
               style={{ background: "linear-gradient(135deg,rgba(244,114,182,0.06),rgba(251,191,36,0.04))", border: "1px solid rgba(244,114,182,0.12)" }}
             >
-              <SectionLabel>Miniature <span className="opacity-40 normal-case font-medium tracking-normal">(optionnel)</span></SectionLabel>
+              <SectionLabel>{t("pages.upload.thumbnailOptional")} <span className="opacity-40 normal-case font-medium tracking-normal">{t("pages.upload.optional")}</span></SectionLabel>
 
               <div
                 onClick={() => thumbnailInputRef.current?.click()}
@@ -464,8 +549,8 @@ export default function UploadPage() {
                       <ImageIcon className="w-5 h-5 text-pink-400" />
                     </div>
                     <div>
-                      <p className="text-white/60 text-sm font-bold">Ajouter une miniature</p>
-                      <p className="text-white/25 text-xs">jpg · png · webp</p>
+                      <p className="text-white/60 text-sm font-bold">{t("pages.upload.addThumbnail")}</p>
+                      <p className="text-white/25 text-xs">{t("pages.upload.thumbnailFormats")}</p>
                     </div>
                   </>
                 )}
@@ -476,7 +561,7 @@ export default function UploadPage() {
             <div className="rounded-3xl p-5 space-y-3"
               style={{ background: "linear-gradient(135deg,rgba(52,211,153,0.06),rgba(96,165,250,0.04))", border: "1px solid rgba(52,211,153,0.12)" }}
             >
-              <SectionLabel>Sous-titres <span className="opacity-40 normal-case font-medium tracking-normal">(optionnel)</span></SectionLabel>
+              <SectionLabel>{t("pages.upload.subtitlesOptional")} <span className="opacity-40 normal-case font-medium tracking-normal">{t("pages.upload.optional")}</span></SectionLabel>
 
               <div className="flex gap-3">
                 <select value={selectedLang} onChange={(e) => setSelectedLang(e.target.value)}
@@ -490,7 +575,7 @@ export default function UploadPage() {
                 <button type="button" onClick={() => subtitleInputRef.current?.click()}
                   className="flex-1 py-3 rounded-xl bg-white/[0.04] border border-white/[0.10] text-white/60 text-sm font-bold uppercase tracking-[0.12em] hover:bg-white/[0.08] hover:border-emerald-400/30 transition-all flex items-center justify-center gap-2"
                 >
-                  <Plus className="w-4 h-4" /> Ajouter .srt / .vtt
+                  <Plus className="w-4 h-4" /> {t("pages.upload.addSubtitle")}
                 </button>
                 <input ref={subtitleInputRef} type="file" accept=".srt,.vtt"
                   className="hidden" onChange={(e) => addSubtitle(e.target.files[0])}
@@ -525,13 +610,13 @@ export default function UploadPage() {
               <button onClick={() => setStep(1)}
                 className="flex-1 py-5 rounded-2xl bg-white/[0.05] border border-white/[0.09] text-white/50 font-black uppercase tracking-[0.15em] text-sm hover:bg-white/[0.09] transition-all flex items-center justify-center gap-2"
               >
-                <ChevronLeft className="w-5 h-5" /> Retour
+                <ChevronLeft className="w-5 h-5" /> {t("pages.upload.back")}
               </button>
               <button onClick={() => file && setStep(3)} disabled={!file}
                 className="flex-[2] py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                 style={{ background: "linear-gradient(135deg,#2563eb,#7c3aed)", boxShadow: file ? "0 0 24px rgba(37,99,235,0.35)" : "none" }}
               >
-                Étape suivante →
+                {t("pages.upload.nextStep")}
               </button>
             </div>
           </motion.div>
@@ -548,7 +633,7 @@ export default function UploadPage() {
             <div className="rounded-3xl p-5 space-y-3"
               style={{ background: "linear-gradient(135deg,rgba(167,139,250,0.07),rgba(96,165,250,0.05))", border: "1px solid rgba(167,139,250,0.15)" }}
             >
-              <SectionLabel>Récapitulatif</SectionLabel>
+              <SectionLabel>{t("pages.upload.summary")}</SectionLabel>
 
               {[
                 { label: "Titre",       value: title },
@@ -558,7 +643,11 @@ export default function UploadPage() {
                 { label: "Fichier",     value: file?.name },
                 { label: "Miniature",   value: thumbnail?.name },
                 {
-                  label: "IA",
+                  label: "Type IA",
+                  value: aiType === "100_AI" ? "100% IA" : "Hybride",
+                },
+                {
+                  label: "Outils IA",
                   value: aiTools.length
                     ? aiTools.map((id) => AI_TOOLS.find((t) => t.id === id)?.label).filter(Boolean).join(", ")
                     : null,
@@ -594,16 +683,16 @@ export default function UploadPage() {
               <button onClick={() => setStep(2)} disabled={status === "uploading"}
                 className="flex-1 py-5 rounded-2xl bg-white/[0.05] border border-white/[0.09] text-white/50 font-black uppercase tracking-[0.15em] text-sm hover:bg-white/[0.09] transition-all flex items-center justify-center gap-2 disabled:opacity-40"
               >
-                <ChevronLeft className="w-5 h-5" /> Retour
+                <ChevronLeft className="w-5 h-5" /> {t("pages.upload.back")}
               </button>
               <button onClick={handleSubmit} disabled={status === "uploading"}
                 className="flex-[2] py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm text-white disabled:opacity-40 transition-all flex items-center justify-center gap-2"
                 style={{ background: "linear-gradient(135deg,#7c3aed,#db2777)", boxShadow: "0 0 30px rgba(124,58,237,0.4)" }}
               >
                 {status === "uploading" ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> Envoi…</>
+                  <><Loader2 className="w-5 h-5 animate-spin" /> {t("pages.upload.uploading")}</>
                 ) : (
-                  "Soumettre"
+                  t("pages.upload.submit")
                 )}
               </button>
             </div>
@@ -635,10 +724,10 @@ export default function UploadPage() {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                Soumission réussie
+                {t("pages.upload.successTitle")}
               </p>
               <p className="text-white/40 text-sm mt-3">
-                Votre film a été soumis à MARSAI 2026
+                {t("pages.upload.successMessage")}
               </p>
             </div>
 
@@ -661,7 +750,7 @@ export default function UploadPage() {
               className="w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm transition-all"
               style={{ background: "linear-gradient(135deg,rgba(124,58,237,0.15),rgba(37,99,235,0.15))", border: "1px solid rgba(124,58,237,0.25)", color: "rgba(255,255,255,0.6)" }}
             >
-              Nouvelle soumission
+              {t("pages.upload.newSubmission")}
             </button>
           </motion.div>
         )}

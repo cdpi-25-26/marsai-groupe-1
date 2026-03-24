@@ -73,10 +73,14 @@ export default function FooterLayout() {
                 </button>
               </div>
               {status === 'success' && (
-                <p className="text-green-400 text-xs mt-3 font-bold">Inscription confirmee !</p>
+                <p className="text-green-400 text-xs mt-3 font-bold">
+                  {t('lang.fr') === 'FR' ? 'Inscription confirmée !' : 'Subscription confirmed!'}
+                </p>
               )}
               {status === 'error' && (
-                <p className="text-red-400 text-xs mt-3 font-bold">Erreur, veuillez reessayer.</p>
+                <p className="text-red-400 text-xs mt-3 font-bold">
+                  {t('lang.fr') === 'FR' ? 'Erreur, veuillez réessayer.' : 'Error, please try again.'}
+                </p>
               )}
             </div>
           </div>

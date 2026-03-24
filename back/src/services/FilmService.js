@@ -8,6 +8,7 @@ import User from "../models/User.js";
 import VideoUpload from "../models/VideoUpload.js";
 import SubmissionConfig from "../models/SubmissionConfig.js";
 import Notification from "../models/Notification.js";
+import EmailService from "./EmailService.js";
 import { AppError } from "../middlewares/errorHandler.js";
 import logger from "../utils/logger.js";
 
@@ -295,13 +296,10 @@ class FilmService {
           break;
         case "SELECTION_OFFICIELLE":
           notificationType = "SELECTION_OFFICIELLE";
-          title = "Sélection officielle";
+          title = "Sélection officielle — Finaliste !";
           message = "Félicitations ! Votre film a été sélectionné pour la compétition officielle.";
           break;
         default:
-          /**
-           * @bref Pas de notification pour les autres statuts
-           */
           return;
       }
 
@@ -313,12 +311,67 @@ class FilmService {
         relatedId: filmId,
       });
 
+      // Envoyer un email au réalisateur
+      try {
+        const user = await User.findByPk(userId);
+        if (user?.email) {
+          const film = await Film.findByPk(filmId);
+          const filmTitle = film?.title || "votre film";
+          let emailSubject, emailHtml;
+
+          if (newStatus === "APPROVED") {
+            emailSubject = `🎬 MarsAI — Votre film "${filmTitle}" a été accepté !`;
+            emailHtml = `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a1a;color:#fff;padding:40px;border-radius:16px;">
+                <h1 style="color:#51A2FF;margin-bottom:16px;">Vidéo acceptée !</h1>
+                <p>Bonjour <strong>${user.username}</strong>,</p>
+                <p>Nous avons le plaisir de vous informer que votre film <strong>"${filmTitle}"</strong> a été validé par notre équipe de modération.</p>
+                <p>Il est désormais visible dans la galerie publique MarsAI 2026.</p>
+                <br/>
+                <p style="color:#888;">— L'équipe MarsAI</p>
+              </div>`;
+          } else if (newStatus === "REJECTED") {
+            const reason = film?.rejectionReason || "Non spécifié";
+            emailSubject = `MarsAI — Votre film "${filmTitle}" n'a pas été retenu`;
+            emailHtml = `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a1a;color:#fff;padding:40px;border-radius:16px;">
+                <h1 style="color:#ef4444;margin-bottom:16px;">Film non retenu</h1>
+                <p>Bonjour <strong>${user.username}</strong>,</p>
+                <p>Nous sommes au regret de vous informer que votre film <strong>"${filmTitle}"</strong> n'a pas été retenu.</p>
+                <p><strong>Motif :</strong> ${reason}</p>
+                <p>Vous pouvez soumettre un nouveau film à tout moment pendant la période de soumission.</p>
+                <br/>
+                <p style="color:#888;">— L'équipe MarsAI</p>
+              </div>`;
+          } else if (newStatus === "SELECTION_OFFICIELLE") {
+            emailSubject = `🏆 MarsAI — "${filmTitle}" sélectionné en finale !`;
+            emailHtml = `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a1a;color:#fff;padding:40px;border-radius:16px;">
+                <h1 style="color:#a855f7;margin-bottom:16px;">Félicitations, finaliste !</h1>
+                <p>Bonjour <strong>${user.username}</strong>,</p>
+                <p>Votre film <strong>"${filmTitle}"</strong> a été sélectionné pour la <strong>compétition officielle MarsAI 2026</strong> !</p>
+                <p>Votre œuvre sera évaluée par notre jury international. Restez à l'écoute pour les résultats.</p>
+                <br/>
+                <p style="color:#888;">— L'équipe MarsAI</p>
+              </div>`;
+          }
+
+          if (emailSubject) {
+            await EmailService.sendTransactionalEmail({
+              to: { email: user.email, name: user.username },
+              subject: emailSubject,
+              htmlContent: emailHtml,
+            });
+            logger.info("Status change email sent", { userId, filmId, newStatus });
+          }
+        }
+      } catch (emailErr) {
+        logger.error("Failed to send status change email", { error: emailErr.message });
+      }
+
       logger.info("Notification created", { userId, filmId, type: notificationType });
     } catch (error) {
       logger.error("Error creating notification", { error: error.message });
-      /**
-       * @bref Ne pas faire échouer la mise à jour du film si la notification échoue
-       */
     }
   }
 

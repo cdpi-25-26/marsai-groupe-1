@@ -7,6 +7,21 @@ import { useQuery } from "@tanstack/react-query";
 import { getFilmById } from "../../api/films.js";
 import { mapFilm } from "../../utils/mapFilm.js";
 
+function YouTubePlayer({ youtubeId, title }) {
+  if (!youtubeId) return null;
+  return (
+    <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-white/10">
+      <iframe
+        src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
+        title={title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        className="absolute inset-0 w-full h-full"
+      />
+    </div>
+  );
+}
+
 function ImpactStat({ icon: Icon, label, value, color }) {
   return (
     <div className="flex items-center gap-3 sm:gap-4">
@@ -92,116 +107,101 @@ export default function Detail() {
       transition={{ duration: 0.4 }}
       className="w-full min-h-screen text-foreground font-['Arimo'] -mt-52"
     >
-      {/* Cinematic Hero */}
-      <div className="relative h-[60vh] sm:h-[75vh] md:h-screen w-full">
-        {/* Background */}
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5 }}
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${film.thumbnail})` }}
+      {/* Top Controls */}
+      <div className="px-4 sm:px-6 md:px-8 pt-20 md:pt-28 flex justify-between items-center">
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 sm:gap-3 bg-white/5 backdrop-blur-2xl border border-white/10 px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all"
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-background" />
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
-        </motion.div>
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em]">
+            {t("pages.detail.close")}
+          </span>
+        </motion.button>
 
-        {/* Top Controls */}
-        <div className="absolute top-20 md:top-28 left-0 right-0 px-4 sm:px-6 md:px-8 flex justify-between items-center z-50">
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-2xl border border-white/10 px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all"
-          >
-            <X className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em]">
-              {t("pages.detail.close")}
-            </span>
-          </motion.button>
-
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-black/40 backdrop-blur-2xl border border-white/10 rounded-xl sm:rounded-2xl hover:bg-white/10 transition-all"
-          >
-            <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-          </motion.button>
-        </div>
-
-        {/* Center Play */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3, type: "spring" }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white/10 backdrop-blur-3xl border border-white/20 rounded-full flex items-center justify-center shadow-2xl group transition-all"
-          >
-            <Play className="w-7 h-7 sm:w-10 sm:h-10 md:w-14 md:h-14 text-white fill-white ml-1 group-hover:scale-110 transition-transform" />
-          </motion.button>
-        </div>
-
-        {/* Hero Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 md:p-16 flex flex-col items-center text-center"
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/5 backdrop-blur-2xl border border-white/10 rounded-xl sm:rounded-2xl hover:bg-white/10 transition-all"
         >
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-4 sm:mb-8">
-            <div className="bg-[#51A2FF]/80 backdrop-blur-md px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-white/20">
-              {film.category}
-            </div>
-            {film.rank && (
-              <div className="bg-pink-500 backdrop-blur-md px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
-                {t("pages.detail.marsaiTop")} {film.rank} MARSAI
-              </div>
-            )}
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl md:text-9xl font-black mb-3 sm:mb-6 tracking-tighter leading-none bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 uppercase max-w-5xl">
-            {film.title}
-          </h1>
-
-          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-cyan-400 font-bold text-base sm:text-xl md:text-2xl mb-6 sm:mb-12">
-            <button onClick={() => navigate("/Profile")} className="hover:text-white transition-colors">
-              @{film.directorUsername.replace("@", "")}
-            </button>
-            <div className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
-            <span className="text-white/60 text-sm sm:text-lg md:text-xl font-medium tracking-widest uppercase">
-              {film.duration}
-            </span>
-          </div>
-
-          <div className="flex gap-3 sm:gap-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLike}
-              className={`flex items-center gap-2 sm:gap-3 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl sm:rounded-3xl font-black uppercase tracking-widest text-xs transition-all ${
-                isLiked
-                  ? "bg-pink-500 shadow-xl shadow-pink-500/20"
-                  : "bg-white/10 backdrop-blur-xl border border-white/10 hover:bg-white/20"
-              }`}
-            >
-              <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isLiked ? "fill-current" : ""}`} />
-              {formatNumber(likes)}
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsSaved(!isSaved)}
-              className={`w-12 sm:w-16 flex items-center justify-center rounded-2xl sm:rounded-3xl border transition-all ${
-                isSaved ? "bg-[#51A2FF] border-[#51A2FF] text-white" : "bg-white/5 border-white/10 text-white"
-              }`}
-            >
-              <Bookmark className={`w-4 h-4 sm:w-5 sm:h-5 ${isSaved ? "fill-current" : ""}`} />
-            </motion.button>
-          </div>
-        </motion.div>
+          <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
+        </motion.button>
       </div>
+
+      {/* Video Player or Hero Image */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 mt-6 sm:mt-10">
+        {film.youtubeId ? (
+          <YouTubePlayer youtubeId={film.youtubeId} title={film.title} />
+        ) : (
+          <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10">
+            <img src={film.thumbnail} alt={film.title} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+              <Play className="w-16 h-16 text-white/60" />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Title Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="max-w-5xl mx-auto px-4 sm:px-8 md:px-16 mt-8 flex flex-col items-center text-center"
+      >
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <div className="bg-[#51A2FF]/80 backdrop-blur-md px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-white/20">
+            {film.category}
+          </div>
+          {film.rank && (
+            <div className="bg-pink-500 backdrop-blur-md px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
+              {t("pages.detail.marsaiTop")} {film.rank} MARSAI
+            </div>
+          )}
+        </div>
+
+        <h1 className="text-4xl sm:text-6xl md:text-8xl font-black mb-3 sm:mb-6 tracking-tighter leading-none bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 uppercase max-w-5xl">
+          {film.title}
+        </h1>
+
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-cyan-400 font-bold text-base sm:text-xl md:text-2xl mb-6 sm:mb-12">
+          <button onClick={() => navigate("/Profile")} className="hover:text-white transition-colors">
+            @{film.directorUsername.replace("@", "")}
+          </button>
+          <div className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
+          <span className="text-white/60 text-sm sm:text-lg md:text-xl font-medium tracking-widest uppercase">
+            {film.duration}
+          </span>
+        </div>
+
+        <div className="flex gap-3 sm:gap-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLike}
+            className={`flex items-center gap-2 sm:gap-3 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl sm:rounded-3xl font-black uppercase tracking-widest text-xs transition-all ${
+              isLiked
+                ? "bg-pink-500 shadow-xl shadow-pink-500/20"
+                : "bg-white/10 backdrop-blur-xl border border-white/10 hover:bg-white/20"
+            }`}
+          >
+            <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isLiked ? "fill-current" : ""}`} />
+            {formatNumber(likes)}
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsSaved(!isSaved)}
+            className={`w-12 sm:w-16 flex items-center justify-center rounded-2xl sm:rounded-3xl border transition-all ${
+              isSaved ? "bg-[#51A2FF] border-[#51A2FF] text-white" : "bg-white/5 border-white/10 text-white"
+            }`}
+          >
+            <Bookmark className={`w-4 h-4 sm:w-5 sm:h-5 ${isSaved ? "fill-current" : ""}`} />
+          </motion.button>
+        </div>
+      </motion.div>
 
       {/* Content Body */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 sm:py-16 md:py-20 grid lg:grid-cols-3 gap-8 sm:gap-12 lg:gap-20">

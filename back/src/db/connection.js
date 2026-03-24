@@ -13,9 +13,17 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT) || 3306,
-    dialect: process.env.DB_DIALECT,
+    dialect:  process.env.DB_DIALECT,
     logging: false,
+    charset: "utf8mb4",
+    collate: "utf8mb4_unicode_ci",
+    define: {
+      charset: "utf8mb4",
+      collate: "utf8mb4_unicode_ci",
+    },
     dialectOptions: {
+      charset: "utf8mb4",
+      supportBigNumbers: true,
       allowPublicKeyRetrieval: true,
     },
     pool: {

@@ -89,9 +89,26 @@ const VideoUpload = sequelize.define(
       comment: "Catégorie du film",
     },
     aiTools: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: "Outils IA utilisés (tableau d'ids)",
+      get() {
+        const raw = this.getDataValue("aiTools");
+        if (!raw) return null;
+        try {
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : null;
+        } catch {
+          return null;
+        }
+      },
+      set(value) {
+        if (!value) {
+          this.setDataValue("aiTools", null);
+          return;
+        }
+        this.setDataValue("aiTools", JSON.stringify(value));
+      },
     },
     synopsis: {
       type: DataTypes.TEXT,

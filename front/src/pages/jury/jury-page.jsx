@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { motion } from "motion/react";
 import {
-  X, ChevronLeft, ChevronRight, Play, Pause,
-  Volume2, VolumeX, Maximize, CheckCircle, AlertCircle, Loader2,
+  X, ChevronLeft, ChevronRight, Play,
+  CheckCircle, AlertCircle, Loader2,
 } from "lucide-react";
 import { fetchSelectionOfficielle } from "../../api/films";
 import {
@@ -73,8 +73,6 @@ function JuryVotePage({ filmId }) {
   const [comment,     setComment]     = useState(() => getVoteLocal(filmId)?.internalComment ?? "");
   const [isSubmitted, setIsSubmitted] = useState(() => !!getVoteLocal(filmId));
   const [isSaving,    setIsSaving]    = useState(false);
-  const [isPlaying,   setIsPlaying]   = useState(false);
-  const [isMuted,     setIsMuted]     = useState(false);
 
   // 1. Charger la liste des films depuis l'API
   useEffect(() => {
@@ -242,32 +240,22 @@ function JuryVotePage({ filmId }) {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Colonne gauche */}
           <div className="lg:col-span-2 space-y-6">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative aspect-video bg-black rounded-3xl overflow-hidden border border-white/10 group">
-              {film.thumbnail ? (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative aspect-video bg-black rounded-3xl overflow-hidden border border-white/10">
+              {film.youtubeId ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${film.youtubeId}?rel=0`}
+                  title={film.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              ) : film.thumbnail ? (
                 <img src={film.thumbnail} alt={film.title} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-white/5 flex items-center justify-center">
                   <Play className="w-16 h-16 text-white/20" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button onClick={() => setIsPlaying(!isPlaying)} className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 hover:scale-110 transition-transform">
-                    {isPlaying ? <Pause className="w-10 h-10 text-white fill-white" /> : <Play className="w-10 h-10 text-white fill-white ml-1" />}
-                  </button>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-6 flex items-center gap-4">
-                  <button onClick={() => setIsMuted(!isMuted)} className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 hover:bg-white/30 transition-all">
-                    {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
-                  </button>
-                  <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full w-1/3 bg-blue-500 rounded-full" />
-                  </div>
-                  <button className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 hover:bg-white/30 transition-all">
-                    <Maximize className="w-5 h-5 text-white" />
-                  </button>
-                </div>
-              </div>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 md:p-8">

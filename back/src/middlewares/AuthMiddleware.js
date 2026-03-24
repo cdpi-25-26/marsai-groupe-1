@@ -17,12 +17,13 @@ export const requireAuth = (roles = []) => {
   return async (req, res, next) => {
     try {
       const authHeader = req.header("Authorization");
+      let token = null;
 
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        throw new AppError("Token Bearer manquant", 401);
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      } else if (req.query.token) {
+        token = req.query.token;
       }
-
-      const token = authHeader.split(" ")[1];
 
       if (!token) {
         throw new AppError("Token d'authentification requis", 401);

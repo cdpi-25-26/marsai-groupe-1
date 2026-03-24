@@ -73,8 +73,9 @@ export default function Settings() {
   };
 
   const handleExport = (type) => {
-    const url = `/api/config/export?type=${type}`;
-    window.open(`http://localhost:3000${url}`, "_blank");
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const token = localStorage.getItem("token");
+    window.open(`${baseUrl}/api/config/export?type=${type}&token=${token}`, "_blank");
   };
 
   const [notifications, setNotifications] = useState({

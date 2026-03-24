@@ -114,7 +114,7 @@ export const validateDuration = (req, res, next) => {
  * @returns {void}
  */
 export const validateRating = (req, res, next) => {
-  const VALID_RATINGS = ["TRES_BIEN", "BIEN", "BOF", "JAIME_PAS"];
+  const VALID_RATINGS = ["JAIME", "JAIME_PAS", "A_DEBATTRE"];
   if (req.body.score !== undefined) {
     if (!VALID_RATINGS.includes(req.body.score)) {
       return next(

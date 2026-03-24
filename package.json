@@ -14,6 +14,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@sequelize/mariadb": "^7.0.0-alpha.48",
     "i18next": "^25.8.5",
     "react-i18next": "^16.5.4"
   }

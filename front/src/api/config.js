@@ -1,8 +1,11 @@
 import axios from "axios";
 import { toast } from "../components/ToastProvider.jsx";
 
+const rawApiHost = (import.meta.env.VITE_API_URL || window.location.origin).replace(/\/+$/, "");
+const apiHost = rawApiHost.endsWith("/api") ? rawApiHost.slice(0, -4) : rawApiHost;
+
 const instance = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: `${apiHost}/api`,
   timeout: 10000,
 });
 

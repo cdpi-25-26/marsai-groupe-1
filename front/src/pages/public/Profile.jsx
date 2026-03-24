@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
@@ -12,12 +12,20 @@ import { Loader2 } from "lucide-react";
 import { getMe } from "../../api/users.js";
 import { getFilms } from "../../api/films.js";
 import { mapFilm } from "../../utils/mapFilm.js";
+import instance from "../../api/config.js";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("films");
   const [isFollowing, setIsFollowing] = useState(false);
+  const [currentPhase, setCurrentPhase] = useState("1");
+
+  useEffect(() => {
+    instance.get("/config/public").then(({ data }) => {
+      setCurrentPhase(data.current_phase || "1");
+    }).catch(() => {});
+  }, []);
 
   const {
     data: me,
@@ -339,12 +347,18 @@ export default function Profile() {
               <h3 className="text-2xl sm:text-3xl font-black mb-3 sm:mb-4 tracking-tighter uppercase">
                 {t("pages.profile.noSubmissions")}
               </h3>
-              <button
-                onClick={() => navigate("/soumission")}
-                className="bg-white text-black font-black uppercase tracking-widest py-3 sm:py-4 px-8 sm:px-10 rounded-2xl hover:bg-cyan-400 transition-all shadow-xl text-xs"
-              >
-                Créer un film
-              </button>
+              {currentPhase === "1" ? (
+                <button
+                  onClick={() => navigate("/soumission")}
+                  className="bg-white text-black font-black uppercase tracking-widest py-3 sm:py-4 px-8 sm:px-10 rounded-2xl hover:bg-cyan-400 transition-all shadow-xl text-xs"
+                >
+                  {t("lang.fr") === "FR" ? "Créer un film" : "Create a film"}
+                </button>
+              ) : (
+                <p className="text-white/40 text-sm">
+                  {t("lang.fr") === "FR" ? "Les soumissions sont fermées." : "Submissions are closed."}
+                </p>
+              )}
             </div>
           )}
 

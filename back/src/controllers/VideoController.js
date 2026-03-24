@@ -5,6 +5,7 @@
 import VideoUpload from "../models/VideoUpload.js";
 import Film from "../models/Film.js";
 import Notification from "../models/Notification.js";
+import SubmissionConfig from "../models/SubmissionConfig.js";
 import VideoService from "../services/VideoService.js";
 import { asyncHandler, AppError } from "../middlewares/errorHandler.js";
 import logger from "../utils/logger.js";
@@ -21,6 +22,12 @@ const COPYRIGHT_CHECK_DELAY = 4 * 60 * 1000;
  * 3. Statut mis à jour : APPROVED ou REJECTED
  */
 export const uploadVideo = asyncHandler(async (req, res) => {
+  const phaseConfig = await SubmissionConfig.findOne({ where: { key: "current_phase" } });
+  const phase = phaseConfig?.value || "1";
+  if (phase !== "1") {
+    throw new AppError("Les soumissions sont fermées. Seule la Phase 1 accepte les soumissions.", 403);
+  }
+
   if (!req.file) throw new AppError("Fichier vidéo requis (champ 'video')", 400);
 
   const title = req.body.title || req.file.originalname;
@@ -145,7 +152,6 @@ async function checkCopyrightAsync(uploadId, fileBuffer, mimeType, filename, tit
     const isCopyright = err.statusCode === 422;
 
     if (isCopyright) {
-      // Copyright détecté → REJECTED + suppression S3
       await upload.update({
         copyrightStatus: "REJECTED",
         copyrightDetectedAt: new Date(),
@@ -154,7 +160,7 @@ async function checkCopyrightAsync(uploadId, fileBuffer, mimeType, filename, tit
       });
 
       try { await VideoService.deleteFromS3(upload.s3Key); } catch {}
-      logger.info("Video REJECTED", { uploadId, reason: err.message });
+      logger.info("Video REJECTED (copyright)", { uploadId, reason: err.message });
 
       if (upload.userId) {
         await Notification.create({
@@ -164,28 +170,106 @@ async function checkCopyrightAsync(uploadId, fileBuffer, mimeType, filename, tit
           message: `Votre vidéo "${upload.title || upload.filename}" a été rejetée (droits d'auteur).`,
           relatedId: upload.id,
         });
+
+        try {
+          const user = await User.findByPk(upload.userId);
+          if (user?.email) {
+            await EmailService.sendTransactionalEmail({
+              to: { email: user.email, name: user.username },
+              subject: `MarsAI — Vidéo rejetée (copyright) : "${upload.title || upload.filename}"`,
+              htmlContent: `
+                <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a1a;color:#fff;padding:40px;border-radius:16px;">
+                  <h1 style="color:#ef4444;margin-bottom:16px;">Validation YouTube échouée</h1>
+                  <p>Bonjour <strong>${user.username}</strong>,</p>
+                  <p>Votre vidéo <strong>"${upload.title || upload.filename}"</strong> a été rejetée suite à la vérification des droits d'auteur (YouTube Content ID).</p>
+                  <p><strong>Motif :</strong> ${err.message}</p>
+                  <p>Vous pouvez soumettre une nouvelle vidéo libre de droits.</p>
+                  <br/>
+                  <p style="color:#888;">— L'équipe MarsAI</p>
+                </div>`,
+            });
+            logger.info("Copyright rejection email sent", { uploadId, email: user.email });
+          }
+        } catch (emailErr) {
+          logger.error("Failed to send copyright rejection email", { error: emailErr.message });
+        }
       }
     } else {
-      // Erreur technique (quota YouTube, API, etc.) → FAILED + suppression S3 + notification
       await upload.update({
         copyrightStatus: "FAILED",
         rejectionReason: err.message || "Erreur technique lors de la vérification",
         lastCopyrightCheckAt: new Date(),
       });
 
-      try {
-        await VideoService.deleteFromS3(upload.s3Key);
-      } catch {}
-      logger.error("Video check FAILED (technical error), S3 file removed", { uploadId, error: err.message });
+      logger.error("Video check FAILED (technical), S3 file kept", { uploadId, error: err.message });
 
+      // Créer le Film quand même avec la vidéo S3 (fallback sans YouTube)
       if (upload.userId) {
+        let film = await Film.findOne({ where: { videoUploadId: uploadId } });
+        if (!film) {
+          let toolsList = [];
+          if (Array.isArray(upload.aiTools)) {
+            toolsList = upload.aiTools;
+          } else if (typeof upload.aiTools === "string") {
+            try { const p = JSON.parse(upload.aiTools); if (Array.isArray(p)) toolsList = p; } catch {}
+          }
+
+          const SCENARIO_TOOLS = ["chatgpt", "claude", "gemini"];
+          const IMAGE_TOOLS = ["midjourney", "dalle", "stablediff", "flux"];
+          const VIDEO_TOOLS = ["sora", "runway", "kling", "pika"];
+          const SOUND_TOOLS = ["elevenlabs", "suno", "udio"];
+          const pick = (ids) => { const m = toolsList.filter((t) => ids.includes(t)); return m.length ? m.join(", ") : null; };
+
+          film = await Film.create({
+            title: upload.title || upload.filename,
+            description: upload.synopsis || null,
+            country: upload.country ? upload.country.toUpperCase() : null,
+            youtubeId: null,
+            videoUploadId: upload.id,
+            posterPath: upload.thumbnailPath || null,
+            aiIdentity: {
+              scenario: pick(SCENARIO_TOOLS),
+              image: pick(IMAGE_TOOLS),
+              video: pick(VIDEO_TOOLS),
+              sound: pick(SOUND_TOOLS),
+              postProduction: null,
+            },
+            userId: upload.userId,
+            status: "PENDING",
+          });
+          logger.info("Film created (S3 fallback, no YouTube)", { filmId: film.id, uploadId });
+        }
+
         await Notification.create({
           userId: upload.userId,
           type: "VIDEO_UPLOAD_FAILED",
-          title: "Vidéo non traitée",
-          message: `La vérification de votre vidéo "${upload.title || upload.filename}" a échoué (erreur technique). Vous pouvez réessayer plus tard.`,
+          title: "Vidéo soumise (YouTube indisponible)",
+          message: `Votre vidéo "${upload.title || upload.filename}" a été soumise via S3. L'upload YouTube a échoué mais votre film est bien enregistré.`,
           relatedId: upload.id,
         });
+
+        try {
+          const user = await User.findByPk(upload.userId);
+          if (user?.email) {
+            await EmailService.sendTransactionalEmail({
+              to: { email: user.email, name: user.username },
+              subject: `MarsAI — Votre film "${upload.title || upload.filename}" a été soumis`,
+              htmlContent: `
+                <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a1a;color:#fff;padding:40px;border-radius:16px;">
+                  <h1 style="color:#51A2FF;margin-bottom:16px;">Film soumis avec succès</h1>
+                  <p>Bonjour <strong>${user.username}</strong>,</p>
+                  <p>Votre vidéo <strong>"${upload.title || upload.filename}"</strong> a bien été enregistrée sur la plateforme MarsAI.</p>
+                  <p>L'upload YouTube n'a pas pu aboutir, mais votre film est disponible via notre stockage sécurisé.</p>
+                  <p>Notre équipe de modération va examiner votre soumission prochainement.</p>
+                  <br/>
+                  <p style="color:#888;">— L'équipe MarsAI</p>
+                </div>`,
+            });
+            logger.info("Technical fallback email sent", { uploadId, email: user.email });
+          }
+        } catch (emailErr) {
+          logger.error("Failed to send fallback email", { error: emailErr.message });
+        }
       }
     }
   }

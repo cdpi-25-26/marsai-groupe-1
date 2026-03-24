@@ -2,16 +2,27 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { TrendingUp, Eye, Heart, Crown, ChevronRight, Loader2 } from "lucide-react";
+import { TrendingUp, Eye, Heart, Crown, ChevronRight, Loader2, Trophy, Award, Medal } from "lucide-react";
 import { fetchSelectionOfficielle } from "../../api/films";
+import instance from "../../api/config.js";
 
 export default function Competition() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [films, setFilms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPhase, setCurrentPhase] = useState("1");
+  const [winners, setWinners] = useState([]);
 
   useEffect(() => {
+    instance.get("/config/public").then(({ data }) => {
+      setCurrentPhase(data.current_phase || "1");
+    }).catch(() => {});
+
+    instance.get("/config/winners").then(({ data }) => {
+      if (data.winners?.length) setWinners(data.winners);
+    }).catch(() => {});
+
     fetchSelectionOfficielle()
       .then(({ data }) => {
         const mapped = (data.data ?? data).map((f, i) => ({
@@ -48,27 +59,53 @@ export default function Competition() {
     );
   }
 
-  if (topFilms.length === 0) {
+  if (currentPhase === "1" || (topFilms.length === 0 && currentPhase !== "3")) {
     return (
-      <div className="min-h-screen text-foreground pb-32">
+      <div className="min-h-screen text-foreground pb-32 selection:bg-purple-500/30">
         <div className="relative pt-8 md:pt-16 pb-16 px-6" style={{ overflow: "hidden" }}>
           <div className="absolute top-0 left-1/4 w-72 h-72 md:w-[500px] md:h-[500px] bg-purple-500/15 rounded-full blur-[80px] md:blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-56 h-56 md:w-[400px] md:h-[400px] bg-pink-600/15 rounded-full blur-[60px] md:blur-[100px] pointer-events-none" />
+
           <div className="max-w-6xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8"
+            >
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500" />
+              </span>
+              <span className="text-xs font-black tracking-[0.2em] uppercase text-white/60">
+                {t("lang.fr") === "FR" ? "SÉLECTION EN COURS" : "SELECTION IN PROGRESS"}
+              </span>
+            </motion.div>
+
             <motion.h1
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="text-5xl sm:text-7xl md:text-9xl font-black mb-6 tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 leading-[0.9]"
             >
-              {t("pages.competition.title")}
+              LE TOP 50
             </motion.h1>
-            <p className="text-white/50 text-xl mt-8">
-              La selection officielle sera devoilee prochainement.
-            </p>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-white/50 text-sm md:text-xl max-w-2xl mx-auto font-medium leading-relaxed px-4"
+            >
+              {t("lang.fr") === "FR"
+                ? "Le comité de sélection analyse actuellement les films. Le classement officiel sera dévoilé très prochainement."
+                : "The selection committee is currently analyzing the films. The official ranking will be revealed very soon."}
+            </motion.p>
           </div>
         </div>
       </div>
     );
   }
+
+  const PRIZE_ICONS = [Trophy, Award, Medal];
 
   return (
     <div className="min-h-screen text-foreground pb-32 selection:bg-purple-500/30">
@@ -87,7 +124,11 @@ export default function Competition() {
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500" />
             </span>
             <span className="text-xs font-black tracking-[0.2em] uppercase text-white/60">
-              {t("pages.competition.live")}
+              {currentPhase === "3"
+                ? (t("lang.fr") === "FR" ? "CÉRÉMONIE • MARSAI 2026" : "CEREMONY • MARSAI 2026")
+                : currentPhase === "2"
+                ? (t("lang.fr") === "FR" ? "SÉLECTION OFFICIELLE • TOP 50" : "OFFICIAL SELECTION • TOP 50")
+                : t("pages.competition.live")}
             </span>
           </motion.div>
 
@@ -96,7 +137,11 @@ export default function Competition() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-5xl sm:text-7xl md:text-9xl font-black mb-6 tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 leading-[0.9]"
           >
-            {t("pages.competition.title")}
+            {currentPhase === "3"
+              ? (t("lang.fr") === "FR" ? "LES VAINQUEURS" : "THE WINNERS")
+              : currentPhase === "2"
+              ? (t("lang.fr") === "FR" ? "TOP 50" : "TOP 50")
+              : t("pages.competition.title")}
           </motion.h1>
 
           <motion.p
@@ -105,10 +150,66 @@ export default function Competition() {
             transition={{ delay: 0.2 }}
             className="text-white/50 text-sm md:text-xl max-w-2xl mx-auto font-medium leading-relaxed px-4"
           >
-            {t("pages.competition.subtitle")}
+            {currentPhase === "3"
+              ? (t("lang.fr") === "FR" ? "Découvrez les lauréats de MarsAI 2026 sélectionnés par notre jury international." : "Discover the MarsAI 2026 laureates selected by our international jury.")
+              : currentPhase === "2"
+              ? (t("lang.fr") === "FR" ? "Les 50 meilleurs films sélectionnés par notre équipe de modération. Le jury va maintenant voter !" : "The top 50 films selected by our moderation team. The jury will now vote!")
+              : t("pages.competition.subtitle")}
           </motion.p>
         </div>
       </div>
+
+      {/* Winners Section — Phase 3 */}
+      {currentPhase === "3" && winners.length > 0 && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-16">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">
+              {t("lang.fr") === "FR" ? "Palmarès Officiel" : "Official Awards"}
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {winners.map((winner, i) => {
+              const PrizeIcon = PRIZE_ICONS[i] || Trophy;
+              const gradients = [
+                "from-amber-400/20 via-yellow-500/10 to-amber-600/20 border-amber-400/40",
+                "from-slate-300/20 via-gray-400/10 to-slate-500/20 border-slate-400/40",
+                "from-orange-400/20 via-amber-600/10 to-orange-700/20 border-orange-500/40",
+              ];
+              const iconColors = ["text-amber-400", "text-slate-300", "text-orange-500"];
+              return (
+                <motion.div
+                  key={winner.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.15 }}
+                  onClick={() => navigate(`/film/${winner.id}`)}
+                  className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradients[i]} border p-6 cursor-pointer group hover:scale-[1.02] transition-transform`}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <PrizeIcon className={`w-8 h-8 ${iconColors[i]}`} />
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest text-white/40">#{winner.rank}</p>
+                      <p className="font-black text-sm uppercase tracking-tight">{winner.prize}</p>
+                    </div>
+                  </div>
+                  {winner.posterPath && (
+                    <div className="aspect-video rounded-2xl overflow-hidden mb-4 border border-white/10">
+                      <img src={winner.posterPath} alt={winner.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    </div>
+                  )}
+                  <h3 className="text-xl font-black uppercase tracking-tighter mb-1">{winner.title}</h3>
+                  <p className="text-[#51A2FF] text-sm font-black">@{winner.director}</p>
+                  <p className="text-white/30 text-xs mt-2">{winner.country}</p>
+                  <div className="mt-3 flex gap-4 text-xs text-white/50">
+                    <span>{winner.juryLikes} 👍</span>
+                    <span>{winner.juryDislikes} 👎</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {topFilms.length >= 3 && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-16">
