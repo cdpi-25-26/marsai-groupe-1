@@ -58,7 +58,8 @@ export const requireAuth = (roles = []) => {
       if (error instanceof AppError) return next(error);
       if (error.name === "JsonWebTokenError") return next(new AppError("Token invalide", 401));
       if (error.name === "TokenExpiredError") return next(new AppError("Token expiré", 401));
-      next(new AppError("Erreur d'authentification", 401));
+      logger.error("Auth middleware unexpected error", { name: error.name, message: error.message });
+      next(new AppError("Erreur serveur d'authentification", 500));
     }
   };
 };

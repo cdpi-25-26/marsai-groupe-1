@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "db:diagnose": "node ./scripts/db-diagnose.js",
     "db:reset": "node ./scripts/db-reset.js",
     "db:migrate-video-failed": "node ./scripts/migrate-video-upload-failed.js",

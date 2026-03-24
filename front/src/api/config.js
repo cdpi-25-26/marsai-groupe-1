@@ -1,12 +1,16 @@
 import axios from "axios";
 import { toast } from "../components/ToastProvider.jsx";
+import { navigateTo } from "../utils/navigate.js";
 
-const rawApiHost = (import.meta.env.VITE_API_URL || window.location.origin).replace(/\/+$/, "");
+const rawApiHost = import.meta.env.VITE_API_URL;
 const apiHost = rawApiHost.endsWith("/api") ? rawApiHost.slice(0, -4) : rawApiHost;
 
 const instance = axios.create({
   baseURL: `${apiHost}/api`,
   timeout: 10000,
+  headers: {
+    "ngrok-skip-browser-warning": "true",
+  },
 });
 
 instance.interceptors.request.use(
@@ -46,7 +50,7 @@ instance.interceptors.response.use(
       localStorage.removeItem("role");
       localStorage.removeItem("userId");
       if (window.location.pathname !== "/auth/login") {
-        window.location.href = "/auth/login";
+        navigateTo("/auth/login");
       }
     } else if (status === 403) {
       localStorage.removeItem("token");
@@ -54,7 +58,7 @@ instance.interceptors.response.use(
       localStorage.removeItem("role");
       localStorage.removeItem("userId");
       if (window.location.pathname !== "/auth/login") {
-        window.location.href = "/auth/login?reason=forbidden";
+        navigateTo("/auth/login?reason=forbidden");
       }
     }
 

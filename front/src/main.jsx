@@ -1,10 +1,19 @@
 import i18n from "./i18n";
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
 
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes, useNavigate } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { setNavigate } from "./utils/navigate.js";
+
+function NavigationSetup() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    setNavigate(navigate);
+  }, [navigate]);
+  return null;
+}
 
 import "./styles/index.css";
 import { ToastProvider } from "./components/ToastProvider.jsx";
@@ -53,6 +62,7 @@ createRoot(document.getElementById("root")).render(
     <I18nextProvider i18n={i18n}>
       <ToastProvider>
       <BrowserRouter>
+        <NavigationSetup />
         <QueryClientProvider client={queryClient}>
           <Routes>
             {/* Routes publiques */}
