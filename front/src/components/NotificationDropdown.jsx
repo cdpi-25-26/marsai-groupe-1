@@ -92,7 +92,11 @@ export function NotificationDropdown() {
     },
   });
 
-  const notifications = notificationsData?.data || [];
+ const notifications = Array.isArray(notificationsData?.data)
+  ? notificationsData.data
+  : Array.isArray(notificationsData?.data?.notifications)
+  ? notificationsData.data.notifications
+  : [];
   const unreadCount = unreadCountData?.data?.count || 0;
 
   useEffect(() => {
